@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "854872414963",
+    "firebase_url": "https://cookt-3a603.firebaseio.com",
+    "project_id": "cookt-3a603",
+    "storage_bucket": "cookt-3a603.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:854872414963:android:d911a81f9814d26c",
+        "android_client_info": {
+          "package_name": "com.cooktapp.cookt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "854872414963-m81dur9rqsidagkun5b7hvane3t7cnj5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5TWPV-UUM0V-KDiOmm_GqBp0jfjnQGsY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
