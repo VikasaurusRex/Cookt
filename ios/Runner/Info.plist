@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Grab a video of your food.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Go impromptu with the camera to get some nice shots of your food.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Grab assets.images from your photo library to get a more staged shot.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>

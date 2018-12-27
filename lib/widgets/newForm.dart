@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cookt/models/foodItem.dart';
 
 class AddFormPage extends StatefulWidget {
   @override
@@ -7,6 +8,7 @@ class AddFormPage extends StatefulWidget {
 
 class _AddFormPageState extends State<AddFormPage> {
   // One TextEditingController for each form input:
+
   TextEditingController nameController = TextEditingController();
 
   @override
@@ -14,7 +16,7 @@ class _AddFormPageState extends State<AddFormPage> {
     // new page needs scaffolding!
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add New'),
+        title: Text("Add New"),
       ),
       body: Container(
         child: Padding(
@@ -28,7 +30,7 @@ class _AddFormPageState extends State<AddFormPage> {
                 controller: nameController,
                 onChanged: (text) => nameController.text = text,
                 decoration: InputDecoration(
-                  labelText: 'Name Here',
+                  labelText: "Name Here",
                 ),
               ),
               Padding(
@@ -37,9 +39,9 @@ class _AddFormPageState extends State<AddFormPage> {
               Builder(
                 builder: (context) {
                   return RaisedButton(
-                    onPressed: () => print("Pressed"),
+                    onPressed: (){print("Pressed");},
                     color: Theme.of(context).cardColor,
-                    child: Text('Create New Room'),
+                    child: Text("Create New Room"),
                   );
                 },
               ),
