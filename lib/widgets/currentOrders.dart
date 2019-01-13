@@ -25,11 +25,8 @@ class _CurrentOrdersState extends State<CurrentOrders> {
   @override
   Widget build(BuildContext context) {
 
-    Stream<String>.periodic(Duration(seconds: 3), (int numRepeats){
-    }).asBroadcastStream();
-
-    _loadRequestedData();
-    _loadAcceptedData();
+    loadRequestedData();
+    loadAcceptedData();
 
     return Scaffold(
       appBar: AppBar(
@@ -68,16 +65,16 @@ class _CurrentOrdersState extends State<CurrentOrders> {
     print('Back');
   }
 
-  void _loadRequestedData() async {
+  void loadRequestedData() async {
     await for (var snapshots in Firestore.instance
         .collection("orders")
         .where("cookID", isEqualTo: "usercook")
         .where("status", isEqualTo: "REQUESTED")
         .snapshots().asBroadcastStream()) {
       for (int i = 0; i < snapshots.documentChanges.length; i++) {
-
         OrderData order = OrderData.fromSnapshot(snapshots.documents.elementAt(i));
-        if (!requestedOrders.contains(order)){// && (snapshots.documentChanges.elementAt(i) == DocumentChangeType.added || snapshots.documentChanges.elementAt(i) == DocumentChangeType.values)){// && (snapshot.runtimeType == DocumentChangeType.values || snapshot.runtimeType == DocumentChangeType.added)) {
+        print(DocumentChangeType.added.runtimeType);
+        if (!requestedOrders.contains(order)){
           requestedOrders.add(order);
           makeCurrentOrders();
         }
@@ -85,7 +82,7 @@ class _CurrentOrdersState extends State<CurrentOrders> {
     }
   }
 
-  void _loadAcceptedData() async {
+  void loadAcceptedData() async {
     await for (QuerySnapshot snapshots in Firestore.instance
         .collection("orders")
         .where("cookID", isEqualTo: "usercook")
@@ -93,7 +90,7 @@ class _CurrentOrdersState extends State<CurrentOrders> {
         .snapshots().asBroadcastStream()) {
       for (int i = 0; i < snapshots.documentChanges.length; i++) {
         OrderData order = OrderData.fromSnapshot(snapshots.documents.elementAt(i));
-        if (!acceptedOrders.contains(order)){// && (snapshots.documentChanges.elementAt(i) == DocumentChangeType.added || snapshots.documentChanges.elementAt(i) == DocumentChangeType.values)){// && (snapshot.runtimeType == DocumentChangeType.values || snapshot.runtimeType == DocumentChangeType.added)) {
+        if (!acceptedOrders.contains(order)){
           acceptedOrders.add(order);
           makeCurrentOrders();
         }
@@ -145,7 +142,7 @@ class _CurrentOrdersState extends State<CurrentOrders> {
                   ),
                 ],
               ),
-              orderOptions(context, order),
+              _orderOptions(context, order),
             ],
           ),
         ),
@@ -153,7 +150,7 @@ class _CurrentOrdersState extends State<CurrentOrders> {
     );
   }
 
-  Widget orderOptions(BuildContext context, OrderData order){
+  Widget _orderOptions(BuildContext context, OrderData order){
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
@@ -197,6 +194,7 @@ class _CurrentOrdersState extends State<CurrentOrders> {
 
   void makeCurrentOrders(){
     currentOrders = [];
+    print('REQ: ${requestedOrders.length} | ACC: ${acceptedOrders.length}');
     for(OrderData order in requestedOrders){
       currentOrders.add(_orderCell(order));
     }

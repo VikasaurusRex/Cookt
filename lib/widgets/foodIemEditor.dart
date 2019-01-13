@@ -8,30 +8,61 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:cookt/models/foodItem.dart';
 import 'currentOrders.dart';
+import 'myFoodItems.dart';
 
 class FoodItemEditor extends StatefulWidget {
+  final DocumentReference reference;
+
+  FoodItemEditor({@required this.reference});
+
   @override
   _FoodItemEditorState createState() => _FoodItemEditorState();
 }
 
 class _FoodItemEditorState extends State<FoodItemEditor> {
   // One TextEditingController for each form input:
-
-  bool newItem = true;
   FoodItem editableItem = FoodItem.newItem();
-  List<File> images = List(6);
+  List<Image> images = List(6);
+  Map<int, File> changedImages = Map();
+  bool hasLoaded = false;
 
+  TextEditingController nameController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
   TextEditingController pricePaidController = TextEditingController();
   TextEditingController priceReceivedController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    if(widget.reference!=null){
+      widget.reference.get().then((onValue){
+        if(!hasLoaded) {
+          FoodItem foodItem = FoodItem.fromSnapshot(onValue);
+          setState(() {
+            editableItem = foodItem;
+          });
+          for (int i = 0; i < foodItem.numImages; i++) {
+            FirebaseStorage.instance.ref().child("images").child(
+                "${foodItem.reference.documentID}-$i.png")
+                .getDownloadURL()
+                .then((imageUrl) {
+              Image image = Image.network(imageUrl.toString());
+              setState(() {
+                images[i] = image;
+              });
+            });
+          }
+          hasLoaded = true;
+        }
+      });
+    }
     pricePaidController.text = editableItem.price.toStringAsFixed(2);
     priceReceivedController.text = (editableItem.price*(1-FoodItem.cooktPercent)).toStringAsFixed(2);
+    nameController.text = editableItem.name;
+    descriptionController.text = editableItem.description;
     // new page needs scaffolding!
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add New"),
+        title: Text("${widget.reference!=null?'Edit Food Item':'Add New'}"),
         leading: IconButton(
           icon: Icon(Icons.chevron_left),
           iconSize: 40.0,
@@ -47,24 +78,24 @@ class _FoodItemEditorState extends State<FoodItemEditor> {
           child: ListView(
             shrinkWrap: true,
             children: [
-              foodName(),
+              _foodName(),
               Padding(padding: EdgeInsets.all(4.0),),
-              imagesScaffold(),
+              _imagesScaffold(),
               Padding(padding: EdgeInsets.all(4.0),),
-              description(),
+              _description(),
               Padding(padding: EdgeInsets.all(4.0),),
-              dineInAvailability(),
+              _dineInAvailability(),
               Padding(padding: EdgeInsets.all(4.0),),
-              categories(),
+              _categories(),
               Padding(padding: EdgeInsets.all(4.0),),
-              price(),
+              _price(),
               Padding(padding: EdgeInsets.all(20.0),),
               Container(
                 height: 60.0,
                 child: RaisedButton(
                   onPressed: createFoodItem,
                   color: Theme.of(context).cardColor,
-                  child: Text(newItem?"Create Food Item":"Save Edits"),
+                  child: Text(widget.reference==null?"Create Food Item":"Save Edits"),
                 ),
               )
             ],
@@ -76,7 +107,7 @@ class _FoodItemEditorState extends State<FoodItemEditor> {
 
   Future _showCurrentOrders() async {
     // push a new route like you did in the last section
-    Navigator.of(context).push(
+    Navigator.of(context).pop(
       MaterialPageRoute(
         builder: (BuildContext context) {
           return CurrentOrders();
@@ -85,10 +116,12 @@ class _FoodItemEditorState extends State<FoodItemEditor> {
     );
   }
 
-  Widget foodName(){
+  Widget _foodName(){
     return TextField(
+      controller: nameController,
       onSubmitted: (text){
         editableItem.name = text;
+        nameController.text = text;
         setState(() {});
       },
       decoration: InputDecoration(
@@ -100,7 +133,7 @@ class _FoodItemEditorState extends State<FoodItemEditor> {
     );
   }
 
-  Widget imagesScaffold(){
+  Widget _imagesScaffold(){
     double spacing = 2.0;
     return LayoutBuilder(builder: (content, constraints) {
       Size size = Size(constraints.maxWidth, constraints.maxWidth);
@@ -161,36 +194,42 @@ class _FoodItemEditorState extends State<FoodItemEditor> {
             color: Colors.grey,
             image: DecorationImage(
               fit: BoxFit.cover,
-              image: images[index]!=null?FileImage(images[index]):NetworkImage('http://vikramhegde.org/transparent.png'),
+              image: images[index]!=null?images[index].image:NetworkImage('http://www.vikramhegde.org/transparent.png'),
             ),
           ),
           child: FlatButton(
-            onPressed: getImage,
+            onPressed: (){
+              getImage(index: index);
+            },
           ),
         ),
       )
     );
   }
 
-  Future getImage({int index}) async {
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-
-    setState(() {
-      if(editableItem.numImages < 6) {
-        images[editableItem.numImages] = image;
-        editableItem.numImages++;
-      }
-    });
+  void getImage({@required int index}) async {
+    File image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    if(image != null) {
+      print('Changing at $index out of ${editableItem.numImages} total Images');
+      setState(() {
+        images[index > editableItem.numImages ? editableItem.numImages : index] = Image.file(image);
+      });
+      changedImages[index>editableItem.numImages?editableItem.numImages:index] = image;
+      editableItem.numImages+=index>=editableItem.numImages?1:0;
+      print('Number of images: ${editableItem.numImages}');
+    }
   }
 
-  Widget description() {
+  Widget _description() {
     return Builder(
       builder: (context){
         return TextField(
           keyboardType: TextInputType.multiline,
           maxLines: 5,
+          controller: descriptionController,
           onSubmitted: (text){
             editableItem.description = text;
+            descriptionController.text = text;
             setState(() {});
           },
           textInputAction: TextInputAction.done,
@@ -206,7 +245,7 @@ class _FoodItemEditorState extends State<FoodItemEditor> {
     );
   }
 
-  Widget price(){
+  Widget _price(){
     return Container(
       height: 40.0,
       child: Builder(
@@ -262,7 +301,7 @@ class _FoodItemEditorState extends State<FoodItemEditor> {
     );
   }
 
-  Widget dineInAvailability(){
+  Widget _dineInAvailability(){
     return Container(
       height: 40.0,
       child: Row(
@@ -291,7 +330,7 @@ class _FoodItemEditorState extends State<FoodItemEditor> {
     );
   }
 
-  Widget categories(){
+  Widget _categories(){
     bool leftCol = false;
     List<Widget> left = [];
     List<Widget> right = [];
@@ -367,21 +406,25 @@ class _FoodItemEditorState extends State<FoodItemEditor> {
       return;
     }
 
-    if(newItem) {
+    if(widget.reference == null) {
       Future<DocumentReference> ref = editableItem.createListing();
       editableItem.reference = await ref;
     } else {
+      print('Updating with a change');
       editableItem.updateListingWithData(editableItem.reference);
     }
 
-    int index = 0;
-    for(File image in images){
-      if(image != null){
-        FirebaseStorage.instance.ref().child('images').child('${editableItem.reference.documentID}-$index').putFile(image);
-        index++;
-      }
-    }
-    print('Created');
+    changedImages.forEach((i, imageFile) {
+      print(i);
+      FirebaseStorage.instance.ref().child('images').child('${editableItem.reference.documentID}-$i.png').putFile(imageFile);
+    });
+    Navigator.of(context).pop(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return MyFoodItems();
+        },
+      ),
+    );
   }
 
   Future<void> _checkErrors() async {

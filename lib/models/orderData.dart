@@ -4,21 +4,39 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
+import 'foodItem.dart';
+
 class OrderData {
-  final bool accepted;//
-  final String cookID;
-  final String customerID;
-  final bool dineIn;
-  final String foodId;
-  final String lastTouchedID;//
-  final DateTime lastTouchedTime;//
+  final bool accepted;
+  final String cookID;//
+  final String customerID;//
+  final bool dineIn;//
+  final String foodId;//
+  final String lastTouchedID;
+  final DateTime lastTouchedTime;
   final DateTime orderTime;
-  final DateTime pickupTime;
-  final bool postmatesOrder;
-  final int quantity;
-  final String status;//
+  final DateTime pickupTime;//
+  final bool postmatesOrder;//
+  final int quantity;//
+  final String status;
 
   final DocumentReference reference;
+
+  OrderData.newItem(FoodItem item)
+      :
+        this.accepted = false,
+        this.cookID = item.uid,
+        this.customerID = 'usercustomer',
+        this.dineIn = false,
+        this.foodId = item.reference.documentID,
+        this.lastTouchedID = 'usercustomer',
+        this.lastTouchedTime = DateTime.now(),
+        this.orderTime = DateTime.now(),
+        this.pickupTime = DateTime.now(),
+        this.postmatesOrder = false,
+        this.quantity = 1,
+        this.status = 'REQUESTED',
+        this.reference = null;
 
   OrderData.fromMap(Map<String, dynamic> map, {this.reference}) :
         assert(map['accepted'] != null),
@@ -93,15 +111,15 @@ class OrderData {
 
   Widget foodImage(BuildContext context) {
     return FutureBuilder(
-        future: FirebaseStorage.instance.ref().child("images").child("$foodId-0.png").getDownloadURL(),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> imageData) {
-          return Image.network(
-            imageData.data.toString(),
-            height: 100.0,
-            width: 100.0,
-            fit: BoxFit.cover,
-          );
-        }
+      future: FirebaseStorage.instance.ref().child("images").child("$foodId-0.png").getDownloadURL(),
+      builder: (BuildContext context, AsyncSnapshot<dynamic> imageData) {
+        return Image.network(
+          imageData.data.toString(),
+          height: 100.0,
+          width: 100.0,
+          fit: BoxFit.cover,
+        );
+      }
     );
   }
 
@@ -147,6 +165,24 @@ class OrderData {
       "For Pickup",
       style: Theme.of(context).textTheme.title,
     );
+  }
+
+  void createListing() {
+    Map<String, dynamic> map = Map();
+    map['accepted'] = accepted;
+    map['cookID'] = cookID;
+    map['customerID'] = customerID;
+    map['dineIn'] = dineIn;
+    map['foodId'] = foodId;
+    map['lastTouchedID'] = lastTouchedID;
+    map['lastTouchedTime'] = DateTime.now();
+    map['orderTime'] = DateTime.now();
+    map['pickupTime'] = pickupTime;
+    map['postmatesOrder'] = postmatesOrder;
+    map['quantity'] = quantity;
+    map['status'] = 'REQUESTED';
+
+    Firestore.instance.collection('orders').add(map);
   }
 
   void acceptFinishOrder(){
