@@ -7,18 +7,18 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'foodItem.dart';
 
 class OrderData {
-  final bool accepted;
-  final String cookID;//
-  final String customerID;//
-  final bool dineIn;//
-  final String foodId;//
-  final String lastTouchedID;
-  final DateTime lastTouchedTime;
-  final DateTime orderTime;
-  final DateTime pickupTime;//
-  final bool postmatesOrder;//
-  final int quantity;//
-  final String status;
+  bool accepted;
+  String cookID;//
+  String customerID;//
+  bool dineIn;//
+  String foodId;//
+  String lastTouchedID;
+  DateTime lastTouchedTime;
+  DateTime orderTime;
+  DateTime pickupTime;//
+  bool postmatesOrder;//
+  int quantity;//
+  String status;
 
   final DocumentReference reference;
 
@@ -32,7 +32,7 @@ class OrderData {
         this.lastTouchedID = 'usercustomer',
         this.lastTouchedTime = DateTime.now(),
         this.orderTime = DateTime.now(),
-        this.pickupTime = DateTime.now(),
+        this.pickupTime = DateTime.now().add(Duration(minutes: 60-DateTime.now().minute%30)),
         this.postmatesOrder = false,
         this.quantity = 1,
         this.status = 'REQUESTED',

@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Cookt",
-      home: MyFoodItems(),
+      home: FoodItemView(),
       theme: ThemeData(
         primaryColor: Colors.black,
         highlightColor: Colors.black12,

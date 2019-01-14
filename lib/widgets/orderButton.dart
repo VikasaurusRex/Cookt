@@ -98,25 +98,38 @@ class _OrderButtonState extends State<OrderButton>
                   borderRadius: BorderRadius.circular(5.0),
                   border: Border.all(color: Colors.grey),
                 ),
-                child: Text('Order Time'),
-              ),
-              Padding(padding: EdgeInsets.all(2.0),),
-              Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5.0),
-                  border: Border.all(color: Colors.grey),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Padding(padding: EdgeInsets.all(5),),
+                    SizedBox(
+                      width: 50,
+                      height: 30,
+                      child: FlatButton(
+                        onPressed: (){
+                          changeOrderTime(increase: false);
+                        },
+                        child: Icon(Icons.chevron_left),
+                      ),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text('${order.pickupTime.day == DateTime.now().day? 'Today':dayOfTheWeek(order.pickupTime.weekday)} ${order.pickupTime.hour>12?order.pickupTime.hour-12:order.pickupTime.hour==0?12:order.pickupTime.hour}:${order.pickupTime.minute==0?'00':'30'} ${order.pickupTime.hour>=12?'PM':'AM'}'),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 50,
+                      height: 30,
+                      child: FlatButton(
+                        onPressed: (){
+                          changeOrderTime(increase: true);
+                        },
+                        child: Icon(Icons.chevron_right),
+                      ),
+                    ),
+                    Padding(padding: EdgeInsets.all(5),),
+                  ],
                 ),
-                child: Text('Dine In'),
-              ),
-              Padding(padding: EdgeInsets.all(2.0),),
-              Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5.0),
-                  border: Border.all(color: Colors.grey),
-                ),
-                child: Text('Quantity'),
               ),
               Padding(padding: EdgeInsets.all(2.0),),
               Container(
@@ -125,23 +138,90 @@ class _OrderButtonState extends State<OrderButton>
                   borderRadius: BorderRadius.circular(5.0),
                   border: Border.all(color: Colors.grey),
                 ),
+                child: Row(
+                  children: <Widget>[
+                    Padding(padding: EdgeInsets.all(5),),
+                    Expanded(
+                      child: Text('Dine In', style: Theme.of(context).textTheme.subhead,),
+                    ),
+                    Switch.adaptive(
+                      value: order.dineIn && widget.foodItem.dineInAvailable,
+                      onChanged: (bool newState) {
+                        setState(() {
+                          order.dineIn = newState && widget.foodItem.dineInAvailable;
+                          if(!widget.foodItem.dineInAvailable){
+                            _presentDialog();
+                          }
+                        });
+                      },
+                    ),
+                    Padding(padding: EdgeInsets.all(5),),
+                  ],
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(2.0),),
+              Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5.0),
+                  border: Border.all(color: Colors.grey),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Padding(padding: EdgeInsets.all(5),),
+                    SizedBox(
+                      width: 50,
+                      height: 30,
+                      child: FlatButton(
+                        onPressed: (){
+                          if(order.quantity<=1)
+                            return;
+                          setState(() {
+                            order.quantity--;
+                          });
+                        },
+                        child: Icon(Icons.remove),
+                      ),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text('${order.quantity} ${widget.foodItem.name}${order.quantity>1?'s':''}'),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 50,
+                      height: 30,
+                      child: FlatButton(
+                        onPressed: (){
+                          setState(() {
+                            order.quantity++;
+                          });
+                        },
+                        child: Icon(Icons.add),
+                      ),
+                    ),
+                    Padding(padding: EdgeInsets.all(5),),
+                  ],
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(2.0),),
+              Container(
+                height: 50,
                 child: FlatButton(
                   color: Theme.of(context).buttonColor,
                   onPressed: orderDineInCarryOut,
-                  child: Text('Order for Carry Out / Dine In'),
+                  child: Text('${order.dineIn?'Request Reservation':'Order for Carry Out'}'),
                 ),
               ),
               Padding(padding: EdgeInsets.all(2.0),),
               Container(
                 height: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5.0),
-                  border: Border.all(color: Colors.grey),
-                ),
                 child: FlatButton(
-                  color: Theme.of(context).buttonColor,
-                  onPressed: orderDelivery,
-                  child: Text('Order for Delivery'),
+                  color: order.dineIn?Colors.grey:Colors.black,
+                  onPressed: order.dineIn?null:orderDelivery,
+                  splashColor: Colors.grey,
+                  child: Text('Order for Delivery', style: TextStyle(color: Colors.white),),
                 ),
               ),
             ],
@@ -151,12 +231,137 @@ class _OrderButtonState extends State<OrderButton>
     );
   }
 
+  String dayOfTheWeek(int weekday){
+    switch(weekday){
+      case 1:
+        return 'Monday';
+      case 2:
+        return 'Tuesday';
+      case 3:
+        return 'Wednesday';
+      case 4:
+        return 'Thursday';
+      case 5:
+        return 'Friday';
+      case 6:
+        return 'Saturday';
+      case 7:
+        return 'Sunday';
+      default:
+        return 'ERROR';
+    }
+  }
+
+  void changeOrderTime({@required bool increase}){
+    if((order.pickupTime.compareTo(DateTime.now().add(Duration(minutes: 45)))<0 && !increase) || (order.pickupTime.compareTo(DateTime.now().add(Duration(minutes: 300))) > 0 && increase))
+      return;
+    if(!increase){
+      setState(() {
+        order.pickupTime = order.pickupTime.add(Duration(minutes: -30));
+      });
+      return;
+    }
+    setState(() {
+      order.pickupTime = order.pickupTime.add(Duration(minutes: 30));
+    });
+  }
+
+  Future<void> _presentDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Dine in not offered'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('This cook has disabled the option for dine in. Sorry for the inconvenience.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void orderDineInCarryOut(){
-    print('Ordering');
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are you sure you want to order'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Your order will be placed now.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                animate();
+                order.createListing();
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void orderDelivery(){
-    print('Ordering for Delivery');
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are you sure you want to order'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Your order will be placed now.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                animate();
+                order.postmatesOrder = true;
+                order.createListing();
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget floatingButton() {
