@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 import 'package:cookt/models/foodItem.dart';
 import 'orderButton.dart';
@@ -21,18 +24,66 @@ class _FoodItemViewState extends State<FoodItemView> {
   TextEditingController reviewController = TextEditingController();
   int myRating = 0;
 
+  GoogleMapController mapController;
+
+  LatLng myCoords = null;
+  LatLng cookCoords = null;
+
   @override
   Widget build(BuildContext context) {
     loadReviews();
     checkIfOrdered();
+    loadLocation();
     return StreamBuilder<DocumentSnapshot>(
       stream: ref.snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Center(child: Text('Loading...', style: Theme.of(context).textTheme.subhead, ));
         foodItem = FoodItem.fromSnapshot(snapshot.data);
+        loadCookLocation(foodItem);
         return _buildFoodItem();
       },
     );
+  }
+
+  void loadLocation() async{
+    var location = new Location();
+    try {
+      Map<String, double> currentLocation = await location.getLocation();
+      if(myCoords==null|| (myCoords.latitude-currentLocation["latitude"]).abs()>=0.0001 || (myCoords.latitude-currentLocation["latitude"]).abs()>=0.0001)
+        setState(() {
+          myCoords = LatLng(currentLocation["latitude"], currentLocation["longitude"]);
+        });
+      updateMap();
+    } on Exception {
+      print('Location Error');
+    }
+  }
+
+  void updateMap(){
+    mapController.addMarker(
+      MarkerOptions(
+        position: cookCoords,
+      ),
+    );
+    mapController.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: LatLng(myCoords.latitude<cookCoords.latitude?myCoords.latitude:cookCoords.latitude,
+                            myCoords.longitude<cookCoords.longitude?myCoords.longitude:cookCoords.longitude),
+          northeast: LatLng(myCoords.latitude>cookCoords.latitude?myCoords.latitude:cookCoords.latitude,
+                            myCoords.longitude>cookCoords.longitude?myCoords.longitude:cookCoords.longitude),
+        ),
+        80.0,
+      ),
+    );
+  }
+
+  void loadCookLocation(FoodItem foodItem){
+    FirebaseDatabase.instance.reference().child(foodItem.uid).child('userinfo').onValue.listen((onValue){
+      var data = onValue.snapshot.value;
+      cookCoords = LatLng(data['lat'], data['long']);
+      updateMap();
+    });
   }
 
   void loadReviews() async {
@@ -204,13 +255,18 @@ class _FoodItemViewState extends State<FoodItemView> {
 
   Widget _map(){
     return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(5.0),
-      ),
       height: 400.0,
-      child: Center(
-        child: Text('MAP', style: Theme.of(context).textTheme.subhead,),
+      child: GoogleMap(
+        onMapCreated: (GoogleMapController controller) {
+          mapController = controller;
+        },
+        options: GoogleMapOptions(
+          mapType: MapType.satellite,
+          myLocationEnabled: true,
+          rotateGesturesEnabled: false,
+          scrollGesturesEnabled: false,
+          tiltGesturesEnabled: false,
+        ),
       ),
     );
   }
