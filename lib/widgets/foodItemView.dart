@@ -10,13 +10,16 @@ import 'package:cookt/models/foodItem.dart';
 import 'orderButton.dart';
 
 class FoodItemView extends StatefulWidget {
+  final DocumentReference reference;
+
+  FoodItemView({@required this.reference});
+
   @override
   _FoodItemViewState createState() => _FoodItemViewState();
 }
 
 class _FoodItemViewState extends State<FoodItemView> {
   // One TextEditingController for each form input:
-  DocumentReference ref = Firestore.instance.collection('fooddata').document('1yzdDBacqdeRxewvuczy');
   bool hasOrdered = false;
   FoodItem foodItem = FoodItem.newItem();
   List<Widget> images = [];
@@ -25,6 +28,8 @@ class _FoodItemViewState extends State<FoodItemView> {
   int myRating = 0;
 
   GoogleMapController mapController;
+
+  OrderButton orderButton;
 
   LatLng myCoords = null;
   LatLng cookCoords = null;
@@ -35,11 +40,14 @@ class _FoodItemViewState extends State<FoodItemView> {
     checkIfOrdered();
     loadLocation();
     return StreamBuilder<DocumentSnapshot>(
-      stream: ref.snapshots(),
+      stream: widget.reference.snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Center(child: Text('Loading...', style: Theme.of(context).textTheme.subhead, ));
         foodItem = FoodItem.fromSnapshot(snapshot.data);
         loadCookLocation(foodItem);
+        setState(() {
+          orderButton = OrderButton(foodItem: foodItem,);
+        });
         return _buildFoodItem();
       },
     );
@@ -49,14 +57,12 @@ class _FoodItemViewState extends State<FoodItemView> {
     var location = new Location();
     try {
       Map<String, double> currentLocation = await location.getLocation();
-      if(myCoords==null|| (myCoords.latitude-currentLocation["latitude"]).abs()>=0.0001 || (myCoords.latitude-currentLocation["latitude"]).abs()>=0.0001)
+      if(myCoords==null || (myCoords.latitude-currentLocation["latitude"]).abs()>=0.0001 || (myCoords.longitude-currentLocation["longitude"]).abs()>=0.0001)
         setState(() {
           myCoords = LatLng(currentLocation["latitude"], currentLocation["longitude"]);
         });
       updateMap();
-    } on Exception {
-      print('Location Error');
-    }
+    } on Exception {}
   }
 
   void updateMap(){
@@ -65,6 +71,14 @@ class _FoodItemViewState extends State<FoodItemView> {
         position: cookCoords,
       ),
     );
+    if(myCoords == null) {
+      mapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: cookCoords, zoom: 15)
+        )
+      );
+      return;
+    }
     mapController.animateCamera(
       CameraUpdate.newLatLngBounds(
         LatLngBounds(
@@ -87,7 +101,7 @@ class _FoodItemViewState extends State<FoodItemView> {
   }
 
   void loadReviews() async {
-    await for (QuerySnapshot snapshots in ref
+    await for (QuerySnapshot snapshots in widget.reference
         .collection("reviews")
         .snapshots().asBroadcastStream()) {
       for (int i = 0; i < snapshots.documentChanges.length; i++) {
@@ -114,7 +128,7 @@ class _FoodItemViewState extends State<FoodItemView> {
     await for (QuerySnapshot snapshots in Firestore.instance
         .collection("orders")
         .where('customerID', isEqualTo: 'usercustomer')
-        .where('foodId', isEqualTo: '${ref.documentID}')
+        .where('foodId', isEqualTo: '${widget.reference.documentID}')
         .snapshots().asBroadcastStream()) {
       for (DocumentSnapshot snapshot in snapshots.documents) {
         if(snapshot.exists){
@@ -169,7 +183,7 @@ class _FoodItemViewState extends State<FoodItemView> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: OrderButton(foodItem: foodItem,),
+      floatingActionButton: orderButton,
     );
   }
 
@@ -261,7 +275,7 @@ class _FoodItemViewState extends State<FoodItemView> {
           mapController = controller;
         },
         options: GoogleMapOptions(
-          mapType: MapType.satellite,
+          mapType: MapType.hybrid,
           myLocationEnabled: true,
           rotateGesturesEnabled: false,
           scrollGesturesEnabled: false,

@@ -56,7 +56,6 @@ class _MyFoodItemsState extends State<MyFoodItems> {
     await for (var snapshots in Firestore.instance
         .collection("fooddata")
         .where("uid", isEqualTo: "usercook")
-        .orderBy("isHosting", descending: true)
         .snapshots().asBroadcastStream()) {
       for (int i = 0; i < snapshots.documentChanges.length; i++) {
         FoodItem foodItem = FoodItem.fromSnapshot(snapshots.documents.elementAt(i));

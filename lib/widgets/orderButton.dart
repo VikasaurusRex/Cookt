@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:http/http.dart' as http;
+
 import 'package:cookt/models/orderData.dart';
 import 'package:cookt/models/foodItem.dart';
 
@@ -17,6 +19,7 @@ class _OrderButtonState extends State<OrderButton>
 
   OrderData order;
   bool isOpened = false;
+  double deliveryPrice = -1;
   Animation<Color> _buttonColor;
   AnimationController _animationController;
   Animation<double> _translateButton;
@@ -219,9 +222,9 @@ class _OrderButtonState extends State<OrderButton>
                 height: 50,
                 child: FlatButton(
                   color: order.dineIn?Colors.grey:Colors.black,
-                  onPressed: order.dineIn?null:orderDelivery,
+                  onPressed: deliveryPrice<0?null:order.dineIn?null:orderDelivery,
                   splashColor: Colors.grey,
-                  child: Text('Order for Delivery', style: TextStyle(color: Colors.white),),
+                  child: Text('Order for Delivery (+${(deliveryPrice/100.0).toStringAsFixed(2)})', style: TextStyle(color: Colors.white),),
                 ),
               ),
             ],
@@ -362,6 +365,10 @@ class _OrderButtonState extends State<OrderButton>
         );
       },
     );
+  }
+
+  void deliveryAllowed(){
+
   }
 
   Widget floatingButton() {

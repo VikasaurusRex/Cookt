@@ -68,7 +68,7 @@ class OrderData {
       : this.fromMap(snapshot.data, reference: snapshot.reference);
 
   @override
-  String toString() => "${reference.documentID}";
+  String toString() => "${reference!=null?reference.documentID:"NULL"}";
 
   Widget customerName(BuildContext context){
     return StreamBuilder<Event>(
