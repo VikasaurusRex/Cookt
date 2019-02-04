@@ -6,9 +6,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:cookt/models/foodItem.dart';
-import 'currentOrders.dart';
-import 'myFoodItems.dart';
+import 'package:cookt/models/FoodItem.dart';
+import 'CurrentOrderSummary.dart';
+import 'MyFoodItems.dart';
 
 class FoodItemEditor extends StatefulWidget {
   final DocumentReference reference;
@@ -201,6 +201,7 @@ class _FoodItemEditorState extends State<FoodItemEditor> {
             onPressed: (){
               getImage(index: index);
             },
+            child: images[index]!=null?null:Icon(Icons.photo,color: Colors.black45,),
           ),
         ),
       )

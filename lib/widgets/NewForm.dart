@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cookt/models/foodItem.dart';
+import 'package:cookt/models/FoodItem.dart';
 
 class AddFormPage extends StatefulWidget {
   @override

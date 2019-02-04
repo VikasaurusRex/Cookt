@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:cookt/models/foodItem.dart';
-import 'foodItemView.dart';
+import 'package:cookt/models/FoodItem.dart';
+import 'FoodItemView.dart';
 
 class CategoryView extends StatefulWidget {
   @override
@@ -16,7 +16,7 @@ class _CategoryViewState extends State<CategoryView> {
   List<FoodItem> foodItems = [];
   List<Widget> foodItemCells = [];
   Map<String, File> foodImaged = Map();
-  String category = 'American';
+  String category = 'Indian';
 
   @override
   Widget build(BuildContext context) {

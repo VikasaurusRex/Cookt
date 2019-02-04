@@ -4,10 +4,10 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-import 'foodItem.dart';
+import 'FoodItem.dart';
 
 class OrderData {
-  bool accepted;
+  bool cancelled;
   String cookID;//
   String customerID;//
   bool dineIn;//
@@ -24,7 +24,7 @@ class OrderData {
 
   OrderData.newItem(FoodItem item)
       :
-        this.accepted = false,
+        this.cancelled = false,
         this.cookID = item.uid,
         this.customerID = 'usercustomer',
         this.dineIn = false,
@@ -39,7 +39,7 @@ class OrderData {
         this.reference = null;
 
   OrderData.fromMap(Map<String, dynamic> map, {this.reference}) :
-        assert(map['accepted'] != null),
+        assert(map['cancelled'] != null),
         assert(map['cookID'] != null),
         assert(map['customerID'] != null),
         assert(map['dineIn'] != null),
@@ -51,7 +51,7 @@ class OrderData {
         assert(map['postmatesOrder'] != null),
         assert(map['quantity'] != null),
         assert(map['status'] != null),
-        this.accepted = map['accepted'],
+        this.cancelled = map['cancelled'],
         this.cookID = map['cookID'],
         this.customerID = map['customerID'],
         this.dineIn = map['dineIn'],
@@ -169,26 +169,25 @@ class OrderData {
 
   void createListing() {
     Map<String, dynamic> map = Map();
-    map['accepted'] = accepted;
+    map['cancelled'] = cancelled;
     map['cookID'] = cookID;
     map['customerID'] = customerID;
     map['dineIn'] = dineIn;
     map['foodId'] = foodId;
-    map['lastTouchedID'] = lastTouchedID;
+    map['lastTouchedID'] = 'usercustomer';
     map['lastTouchedTime'] = DateTime.now();
     map['orderTime'] = DateTime.now();
     map['pickupTime'] = pickupTime;
     map['postmatesOrder'] = postmatesOrder;
     map['quantity'] = quantity;
-    map['status'] = 'REQUESTED';
+    map['status'] = 'PENDING';
 
     Firestore.instance.collection('orders').add(map);
   }
 
   void acceptFinishOrder(){
     Map<String, dynamic> data  = Map();
-    data['status'] = accepted?'FINISHED':'ACCEPTED';
-    data['accepted'] = true; // Either accepting or finishing
+    data['status'] = status=='ACCEPTED'?'FINISHED':'ACCEPTED';
     data['lastTouchedID'] = 'usercook';
     data['lastTouchedTime'] = DateTime.now();
     reference.updateData(data);
@@ -196,7 +195,7 @@ class OrderData {
 
   void cancelOrder(){
     Map<String, dynamic> data  = Map();
-    data['status'] = 'CANCELLED';
+    data['cancelled'] = true;
     data['lastTouchedID'] = 'usercook';
     data['lastTouchedTime'] = DateTime.now();
     reference.updateData(data);

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:location/location.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-import 'package:cookt/models/foodItem.dart';
-import 'orderButton.dart';
+import 'package:cookt/models/FoodItem.dart';
+import 'package:cookt/models/OrderData.dart';
 
 class FoodItemView extends StatefulWidget {
   final DocumentReference reference;
@@ -27,9 +26,11 @@ class _FoodItemViewState extends State<FoodItemView> {
   TextEditingController reviewController = TextEditingController();
   int myRating = 0;
 
+  OrderData order;
+
   GoogleMapController mapController;
 
-  OrderButton orderButton;
+  //OrderButton orderButton;
 
   LatLng myCoords = null;
   LatLng cookCoords = null;
@@ -44,10 +45,9 @@ class _FoodItemViewState extends State<FoodItemView> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return Center(child: Text('Loading...', style: Theme.of(context).textTheme.subhead, ));
         foodItem = FoodItem.fromSnapshot(snapshot.data);
+        if(order == null)
+          order = OrderData.newItem(foodItem);
         loadCookLocation(foodItem);
-        setState(() {
-          orderButton = OrderButton(foodItem: foodItem,);
-        });
         return _buildFoodItem();
       },
     );
@@ -182,8 +182,8 @@ class _FoodItemViewState extends State<FoodItemView> {
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: orderButton,
+      floatingActionButton: _orderButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -286,7 +286,7 @@ class _FoodItemViewState extends State<FoodItemView> {
   }
 
   Widget _categories(){
-    bool leftCol = false;
+    bool leftCol = true;
     List<Widget> left = [];
     List<Widget> right = [];
 
@@ -309,8 +309,8 @@ class _FoodItemViewState extends State<FoodItemView> {
       leftCol = !leftCol;
     }
     
-    if(left.length%2==1)
-      left.add(Container(height: 50.0,));
+    if(left.length != right.length)
+      right.add(Container(height: 50.0,));
 
     return Container(
       child: Row(
@@ -598,6 +598,75 @@ class _FoodItemViewState extends State<FoodItemView> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _orderButton(){
+    return Padding(
+      padding: EdgeInsets.all(20.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(5.0),
+                border: Border.all(color: Colors.grey),
+              ),
+              height: 50.0,
+              child:Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(padding: EdgeInsets.all(5),),
+                  SizedBox(
+                    width: 50,
+                    height: 30,
+                    child: FlatButton(
+                      onPressed: (){
+                        print(order.quantity);
+                        if(order.quantity<=1)
+                          return;
+                        setState(() {
+                          order.quantity--;
+                        });
+                      },
+                      child: Icon(Icons.remove),
+                    ),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Text('${order.quantity} ${foodItem.name}${order.quantity>1?'s':''}'),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 50,
+                    height: 30,
+                    child: FlatButton(
+                      onPressed: (){
+                        print(order.quantity);
+                        setState(() {
+                          order.quantity++;
+                          print(order.quantity);
+                        });
+                      },
+                      child: Icon(Icons.add),
+                    ),
+                  ),
+                  Padding(padding: EdgeInsets.all(5),),
+                ],
+              ),
+            ),
+          ),
+          Padding(padding: EdgeInsets.all(8.0),),
+          FloatingActionButton(
+            onPressed: (){
+              order.createListing();
+            },
+            child: Icon(Icons.add_shopping_cart),
+          ),
+        ],
+      ),
     );
   }
 }

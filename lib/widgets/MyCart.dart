@@ -2,25 +2,22 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'newForm.dart';
 import 'package:cookt/models/orderData.dart';
-import 'foodIemEditor.dart';
+import 'FoodItemEditor.dart';
 
-class CurrentOrders extends StatefulWidget {
+class MyCart extends StatefulWidget {
   @override
-  _CurrentOrdersState createState() {
-    return _CurrentOrdersState();
+  _MyCartState createState() {
+    return _MyCartState();
   }
 }
 
-class _CurrentOrdersState extends State<CurrentOrders> {
+class _MyCartState extends State<MyCart> {
   List<OrderData> requestedOrders = [];
   List<OrderData> acceptedOrders = [];
-
   List<Widget> currentOrders = [];
 
   Map<String, File> foodImaged = Map();
-
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +67,7 @@ class _CurrentOrdersState extends State<CurrentOrders> {
         .collection("orders")
         .where("cookID", isEqualTo: "usercook")
         .where("status", isEqualTo: "REQUESTED")
+        .where("cancelled", isEqualTo: false)
         .snapshots().asBroadcastStream()) {
       for (int i = 0; i < snapshots.documentChanges.length; i++) {
         OrderData order = OrderData.fromSnapshot(snapshots.documents.elementAt(i));
@@ -83,13 +81,15 @@ class _CurrentOrdersState extends State<CurrentOrders> {
   }
 
   void loadAcceptedData() async {
-    await for (QuerySnapshot snapshots in Firestore.instance
+    await for (var snapshots in Firestore.instance
         .collection("orders")
         .where("cookID", isEqualTo: "usercook")
         .where("status", isEqualTo: "ACCEPTED")
+        .where("cancelled", isEqualTo: false)
         .snapshots().asBroadcastStream()) {
       for (int i = 0; i < snapshots.documentChanges.length; i++) {
         OrderData order = OrderData.fromSnapshot(snapshots.documents.elementAt(i));
+        print(DocumentChangeType.added.runtimeType);
         if (!acceptedOrders.contains(order)){
           acceptedOrders.add(order);
           makeCurrentOrders();
@@ -111,6 +111,7 @@ class _CurrentOrdersState extends State<CurrentOrders> {
           child: Column(
             children: <Widget>[
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   ClipRRect(
                     borderRadius: new BorderRadius.circular(10.0),
@@ -126,17 +127,17 @@ class _CurrentOrdersState extends State<CurrentOrders> {
                         Padding(padding: EdgeInsets.all(4.0)),
                         order.pickupTimeFromNow(context),
                         Padding(padding: EdgeInsets.all(4.0)),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            '${order.status.toUpperCase().substring(0, 1)}${order.status.toLowerCase().substring(1)}',
-                            style: Theme.of(context).textTheme.subhead,
-                          ),
-                          order.customerName(context),
-                        ],
-                      ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              '${order.status.toUpperCase().substring(0, 1)}${order.status.toLowerCase().substring(1)}',
+                              style: Theme.of(context).textTheme.subhead,
+                            ),
+                            order.customerName(context),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -161,7 +162,7 @@ class _CurrentOrdersState extends State<CurrentOrders> {
             },
             splashColor: Colors.greenAccent,
             child: Text(
-              order.accepted?"Finish":"Accept",
+              order.status == "ACCEPTED"?"Finish":"Accept",
               style: Theme.of(context).textTheme.button.apply(color: Colors.green),
             ),
           ),
@@ -184,7 +185,7 @@ class _CurrentOrdersState extends State<CurrentOrders> {
 
 
   void remove(OrderData order){
-    if(order.accepted){
+    if(order.status == "ACCEPTED"){
       acceptedOrders.remove(order);
     }else{
       requestedOrders.remove(order);
@@ -196,7 +197,7 @@ class _CurrentOrdersState extends State<CurrentOrders> {
     currentOrders = [];
     print('REQ: ${requestedOrders.length} | ACC: ${acceptedOrders.length}');
     for(OrderData order in requestedOrders){
-      currentOrders.add(_orderCell(order));
+      currentOrders.insert(0, _orderCell(order));
     }
     for(OrderData order in acceptedOrders){
       currentOrders.add(_orderCell(order));
@@ -214,7 +215,7 @@ class _CurrentOrdersState extends State<CurrentOrders> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Are you sure you want to ${isCancelling?'cancel':order.accepted?'finish':'accept'} the order?'),
+                Text('Are you sure you want to ${isCancelling?'cancel':order.status == "ACCEPTED"?'finish':'accept'} the order?'),
               ],
             ),
           ),

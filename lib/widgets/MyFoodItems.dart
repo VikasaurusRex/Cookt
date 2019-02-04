@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:cookt/models/foodItem.dart';
-import 'foodIemEditor.dart';
+import 'package:cookt/models/FoodItem.dart';
+import 'FoodItemEditor.dart';
 
 class MyFoodItems extends StatefulWidget {
   @override

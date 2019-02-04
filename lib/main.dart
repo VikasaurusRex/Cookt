@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 
-import 'package:cookt/widgets/foodIemEditor.dart';
-import 'package:cookt/widgets/currentOrders.dart';
-import 'package:cookt/widgets/foodItemView.dart';
-import 'package:cookt/widgets/myFoodItems.dart';
-import 'package:cookt/widgets/categoryView.dart';
+import 'package:cookt/widgets/FoodItemEditor.dart';
+import 'package:cookt/widgets/CurrentOrderSummary.dart';
+import 'package:cookt/widgets/FoodItemView.dart';
+import 'package:cookt/widgets/MyFoodItems.dart';
+import 'package:cookt/widgets/CategoryView.dart';
+import 'package:cookt/widgets/MyCart.dart';
 
 void main() => runApp(MyApp());
 
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Cookt",
-      home: CategoryView(),
+      home: MyCart(),
       theme: ThemeData(
         //primaryColor: Colors.blue,
       ),

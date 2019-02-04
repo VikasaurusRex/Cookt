@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
+import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:geocoder/geocoder.dart';
 
-import 'package:cookt/models/orderData.dart';
-import 'package:cookt/models/foodItem.dart';
+import 'package:cookt/models/OrderData.dart';
+import 'package:cookt/models/FoodItem.dart';
 
 class OrderButton extends StatefulWidget {
   final FoodItem foodItem;
@@ -20,10 +25,15 @@ class _OrderButtonState extends State<OrderButton>
   OrderData order;
   bool isOpened = false;
   double deliveryPrice = -1;
+
+  bool shouldLoadLocation = true;
   Animation<Color> _buttonColor;
   AnimationController _animationController;
   Animation<double> _translateButton;
   Animation<double> _animateIcon;
+
+  LatLng myCoords = null;
+  LatLng cookCoords = null;
 
   @override
   initState() {
@@ -79,6 +89,67 @@ class _OrderButtonState extends State<OrderButton>
       _animationController.reverse();
     }
     isOpened = !isOpened;
+  }
+
+  void loadLocation() async{
+    if(!shouldLoadLocation){
+      return;
+    }
+    var location = new Location();
+    try {
+      Map<String, double> currentLocation = await location.getLocation();
+      if(myCoords==null || (myCoords.latitude-currentLocation["latitude"]).abs()>=0.01 || (myCoords.longitude-currentLocation["longitude"]).abs()>=0.01)
+        setState(() {
+          myCoords = LatLng(currentLocation["latitude"], currentLocation["longitude"]);
+        });
+      updateDelivery();
+    } on Exception {}
+    FirebaseDatabase.instance.reference().child(widget.foodItem.uid).child('userinfo').onValue.listen((onValue){
+      var data = onValue.snapshot.value;
+      cookCoords = LatLng(data['lat'], data['long']);
+      updateDelivery();
+    });
+  }
+
+  void updateDelivery() async {
+    print('updating delivery...');
+    if(myCoords == null || cookCoords == null){
+      print('nvm returning');
+      return;
+    }
+    shouldLoadLocation = false;
+    String url = 'https://api.postmates.com/v1/customers/cus_Kf3bMZuhfEUbQV/delivery_quotes';
+    Map<String, String> headers = Map();
+    headers['Authorization'] = 'Basic ZWZmY2RhOTItZWNjMy00ZGI2LWI5NTQtZjhkOTE0ZTA5NGQ5Og==';
+    headers['Content-Type'] = 'application/x-www-form-urlencoded';
+
+    List<Address> myAddresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(myCoords.latitude, myCoords.longitude));
+    Address myAddress = myAddresses.first;
+
+    List<Address> cookAddresses = await Geocoder.local.findAddressesFromCoordinates(Coordinates(cookCoords.latitude, cookCoords.longitude));
+    Address cookAddress = cookAddresses.first;
+
+    Map<String, String> body = Map();
+
+    print('${myAddress.addressLine}');
+    print('${cookAddress.addressLine}');
+
+    body['pickup_address'] = '${myAddress.addressLine}';
+    body['dropoff_address'] = '${cookAddress.addressLine}';
+
+    print('making call...');
+    http.post(url,headers: headers,body: body).then((response){
+      print('call responded...');
+      Map<String, dynamic> quote = jsonDecode(response.body);
+      if(quote['kind'] == 'error'){
+        return;
+      }else if(quote['kind'] == 'delivery_quote'){
+        print(quote['fee']);print(quote['fee']);
+        setState(() {
+          deliveryPrice = quote['fee'].toDouble();
+        });
+      }
+    });
   }
 
   Widget menu() {
@@ -367,10 +438,6 @@ class _OrderButtonState extends State<OrderButton>
     );
   }
 
-  void deliveryAllowed(){
-
-  }
-
   Widget floatingButton() {
     return Container(
       height: 90,
@@ -409,6 +476,8 @@ class _OrderButtonState extends State<OrderButton>
 
   @override
   Widget build(BuildContext context) {
+    loadLocation();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.end,
