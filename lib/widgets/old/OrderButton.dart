@@ -134,10 +134,9 @@ class _OrderButtonState extends State<OrderButton>
     print('${myAddress.addressLine}');
     print('${cookAddress.addressLine}');
 
-    body['pickup_address'] = '${myAddress.addressLine}';
-    body['dropoff_address'] = '${cookAddress.addressLine}';
+    body['pickup_address'] = '${cookAddress.addressLine}';
+    body['dropoff_address'] = '${myAddress.addressLine}';
 
-    print('making call...');
     http.post(url,headers: headers,body: body).then((response){
       print('call responded...');
       Map<String, dynamic> quote = jsonDecode(response.body);

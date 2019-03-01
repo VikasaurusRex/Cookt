@@ -75,6 +75,12 @@ class OrderData {
       stream: FirebaseDatabase.instance.reference().child(customerID).child('userinfo').onValue.asBroadcastStream(),
       builder: (context, event) {
         if (!event.hasData) return LinearProgressIndicator();
+        if (event.hasError || event.data == null  || event.data.snapshot == null || event.data.snapshot.value == null){
+          return Text(
+            'No Value Found.',
+            style: Theme.of(context).textTheme.subhead,
+          );
+        }
         return Text(
           'For ${event.data.snapshot.value['firstname']} ${event.data.snapshot.value['lastname'].toString().substring(0,1)}.',
           style: Theme.of(context).textTheme.subhead,
@@ -88,9 +94,15 @@ class OrderData {
       stream: FirebaseDatabase.instance.reference().child(cookID).child('userinfo').onValue.asBroadcastStream(),
       builder: (context, event) {
         if (!event.hasData) return LinearProgressIndicator();
+        if (event.hasError || event.data == null  || event.data.snapshot == null || event.data.snapshot.value == null){
+          return Text(
+            'No Value Found.',
+            style: Theme.of(context).textTheme.subhead,
+          );
+        }
         return Text(
           '${event.data.snapshot.value['firstname']} ${event.data.snapshot.value['lastname'].toString().substring(0,1)}.',
-          style: Theme.of(context).textTheme.subhead,
+          style: Theme.of(context).textTheme.headline,
         );
       },
     );
@@ -101,8 +113,33 @@ class OrderData {
       stream: Firestore.instance.collection('fooddata').document(foodId).snapshots().asBroadcastStream(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return LinearProgressIndicator();
+        if (snapshot.hasError || snapshot.data == null){
+          return Text(
+            'No Value Found.',
+            style: Theme.of(context).textTheme.subhead,
+          );
+        }
         return Text(
           '${quantity}x ${snapshot.data['name']}',
+          style: Theme.of(context).textTheme.title,
+        );
+      },
+    );
+  }
+
+  Widget foodNameSolo(BuildContext context){
+    return StreamBuilder<DocumentSnapshot>(
+      stream: Firestore.instance.collection('fooddata').document(foodId).snapshots().asBroadcastStream(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return LinearProgressIndicator();
+        if (snapshot.hasError || snapshot.data == null){
+          return Text(
+            'No Value Found.',
+            style: Theme.of(context).textTheme.subhead,
+          );
+        }
+        return Text(
+          '${snapshot.data['name']}',
           style: Theme.of(context).textTheme.title,
         );
       },
@@ -196,6 +233,28 @@ class OrderData {
   void cancelOrder(){
     Map<String, dynamic> data  = Map();
     data['cancelled'] = true;
+    data['lastTouchedID'] = 'usercustomer';
+    data['lastTouchedTime'] = DateTime.now();
+    reference.updateData(data);
+  }
+
+  void incrementQuantity(){
+    Map<String, dynamic> data  = Map();
+    quantity++;
+    data['quantity'] = quantity;
+    data['lastTouchedID'] = 'usercustomer';
+    data['lastTouchedTime'] = DateTime.now();
+    reference.updateData(data);
+  }
+
+  void decrementQuantity(BuildContext context){
+    Map<String, dynamic> data  = Map();
+    if(quantity <= 1){
+      reference.delete();
+      return;
+    }
+    quantity--;
+    data['quantity'] = quantity;
     data['lastTouchedID'] = 'usercook';
     data['lastTouchedTime'] = DateTime.now();
     reference.updateData(data);

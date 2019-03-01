@@ -7,8 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:cookt/models/FoodItem.dart';
-import 'CurrentOrderSummary.dart';
-import 'MyFoodItems.dart';
+import 'package:cookt/widgets/old/CurrentOrderSummary.dart';
+import 'package:cookt/widgets/old/MyFoodItems.dart';
 
 class FoodItemEditor extends StatefulWidget {
   final DocumentReference reference;

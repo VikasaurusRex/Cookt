@@ -3,16 +3,16 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cookt/models/orderData.dart';
-import 'FoodItemEditor.dart';
+import 'package:cookt/widgets/old/FoodItemEditor.dart';
 
-class MyCart extends StatefulWidget {
+class CurrentOrders extends StatefulWidget {
   @override
-  _MyCartState createState() {
-    return _MyCartState();
+  _CurrentOrdersState createState() {
+    return _CurrentOrdersState();
   }
 }
 
-class _MyCartState extends State<MyCart> {
+class _CurrentOrdersState extends State<CurrentOrders> {
   List<OrderData> requestedOrders = [];
   List<OrderData> acceptedOrders = [];
   List<Widget> currentOrders = [];
@@ -119,27 +119,27 @@ class _MyCartState extends State<MyCart> {
                   ),
                   Expanded(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        order.foodName(context),
-                        order.destinationOptions(context),
-                        Padding(padding: EdgeInsets.all(4.0)),
-                        order.pickupTimeFromNow(context),
-                        Padding(padding: EdgeInsets.all(4.0)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              '${order.status.toUpperCase().substring(0, 1)}${order.status.toLowerCase().substring(1)}',
-                              style: Theme.of(context).textTheme.subhead,
-                            ),
-                            order.customerName(context),
-                          ],
-                        ),
-                      ],
-                    ),
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      order.foodName(context),
+                      order.destinationOptions(context),
+                      Padding(padding: EdgeInsets.all(4.0)),
+                      order.pickupTimeFromNow(context),
+                      Padding(padding: EdgeInsets.all(4.0)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            '${order.status.toUpperCase().substring(0, 1)}${order.status.toLowerCase().substring(1)}',
+                            style: Theme.of(context).textTheme.subhead,
+                          ),
+                          order.customerName(context),
+                        ],
+                      ),
+                    ],
+                  ),
                   ),
                 ],
               ),

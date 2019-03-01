@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cookt/models/FoodItem.dart';
-import 'FoodItemEditor.dart';
+import 'package:cookt/widgets/old/FoodItemEditor.dart';
 
 class MyFoodItems extends StatefulWidget {
   @override
