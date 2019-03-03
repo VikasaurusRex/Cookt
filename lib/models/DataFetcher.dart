@@ -53,6 +53,7 @@ class DataFetcher{
     if(uid == null){
       return Container(
         color: Colors.grey,
+        child: Center(child:Icon(Icons.photo)),
       );
     }
     return FutureBuilder(
@@ -61,6 +62,7 @@ class DataFetcher{
           if(imageData.hasError || !imageData.hasData){
             return Container(
               color: Colors.grey,
+              child: Center(child:Icon(Icons.photo)),
             );
           }
           return Image.network(
@@ -73,6 +75,25 @@ class DataFetcher{
 
   static Future<String> nameAbbreviated(String uid) async {
     Event nameEvent = await FirebaseDatabase.instance.reference().child(uid).child('userinfo').onValue.asBroadcastStream().first;
+    if(nameEvent == null){
+      return 'No Food Name';
+    }
     return '${nameEvent.snapshot.value['firstname']} ${nameEvent.snapshot.value['lastname'].toString().substring(0,1)}.';
+  }
+
+  static Future<String> nameFull(String uid) async {
+    Event nameEvent = await FirebaseDatabase.instance.reference().child(uid).child('userinfo').onValue.asBroadcastStream().first;
+    if(nameEvent == null){
+      return 'No Food Name';
+    }
+    return '${nameEvent.snapshot.value['firstname']} ${nameEvent.snapshot.value['lastname']}';
+  }
+
+  static Future<String> foodName(String foodId) async{
+    DocumentSnapshot foodItem = await Firestore.instance.collection('fooddata').document(foodId).get();
+    if(!foodItem.exists || foodItem.data['name'] == null){
+      return 'No Food Name';
+    }
+    return foodItem.data['name'];
   }
 }

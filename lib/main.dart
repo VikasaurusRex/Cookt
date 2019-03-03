@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 
-
 import 'package:cookt/widgets/browse/Browse.dart';
 import 'package:cookt/widgets/search/Search.dart';
 import 'package:cookt/widgets/orders/Orders.dart';
 import 'package:cookt/widgets/profile/Profile.dart';
 
 import 'package:cookt/widgets/browse/BrowseBar.dart';
-import 'package:cookt/widgets/search/SearchBar.dart';
-import 'package:cookt/widgets/orders/OrdersBar.dart';
 import 'package:cookt/widgets/profile/ProfileBar.dart';
+
 
 import 'package:cookt/models/DataFetcher.dart';
 
@@ -22,7 +20,7 @@ class MyApp extends StatelessWidget {
       title: "Cookt",
       home: Home(),
       theme: ThemeData(
-//        primaryColor: Colors.white,
+        //primarySwatch: Colors.red,
       ),
     );
   }
@@ -38,60 +36,84 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   int _currentIndex = 0;
+  int _currentSpecializedIndex = -1; // For more specialized widget homes
 
-  final List<Widget> _children = [
-    PlaceholderWidget(Colors.white),
-    PlaceholderWidget(Colors.grey),
-    PlaceholderWidget(Colors.black54),
-    PlaceholderWidget(Colors.black)
-  ];
+  List<Widget> _children;
+  List<Widget> _specializedChildren;
+  List<Widget> _appBars;
 
-  final List<Widget> _appBars = [
-
-  ];
+  Map<String, int> _specializedIndices = Map();
 
   @override
   Widget build(BuildContext context) {
+
+    _specializedIndices['CurrentSearch'] = 0;
+
+    _appBars = [
+      Text('Home'),
+      null,
+      null,
+      Text('Profile')
+    ];
+
+    _children = [
+      PlaceholderWidget(Colors.transparent),
+      Search(),
+      Orders(),
+      Profile()
+    ];
+
     return Scaffold(
-      appBar: null,//_appBars[_currentIndex],
-      body: _children[_currentIndex], // new
-      bottomNavigationBar: new Theme(
-        data: Theme.of(context).copyWith(
-          // sets the background color of the `BottomNavigationBar`
-          canvasColor: Theme.of(context).primaryColorDark
-        ), // sets the inactive color of the `BottomNavigationBar`
-        child: BottomNavigationBar(
-          onTap: onTabTapped, // new
-          currentIndex: _currentIndex, // new
-          items: [
-            new BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              title: Text('Home'),
-            ),
-            new BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              title: Text('Search'),
-            ),
-            new BottomNavigationBarItem(
-                icon: Icon(Icons.receipt),
-                title: Text('Orders')
-            ),
-            new BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                title: Text('Profile')
-            ),
-          ],
-        ),
+      appBar: _appBars[_currentIndex]==null?null:AppBar(title: _appBars[_currentIndex]),//_appBars[_currentIndex],
+      body: _currentSpecializedIndex>=0?_specializedChildren[_currentSpecializedIndex]:_children[_currentIndex], // new
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        onTap: onTabTapped, // new
+        currentIndex: _currentIndex, // new
+        items: [
+          new BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            title: Text('Home'),
+          ),
+          new BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            title: Text('Search'),
+          ),
+          new BottomNavigationBarItem(
+              icon: Icon(Icons.receipt),
+              title: Text('Orders')
+          ),
+          new BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              title: Text('Profile')
+          ),
+        ],
       ),
     );
   }
 
+  // MARK: Main Controller Methods
+
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
+      _currentSpecializedIndex = -1;
     });
   }
+
+  // MARK: Home Controller Methods
+
+  // MARK: Search Controller Methods
+
+  // MARK: Order Controller Methods
+
+  // MARK: Profile Controller Methods
 }
+
+
+
+
+// MARK: Placeholders for Development of Specialized Widgets
 
 class PlaceholderWidget extends StatefulWidget {
   final Color color;
@@ -105,14 +127,14 @@ class PlaceholderWidget extends StatefulWidget {
 class _PlaceholderWidgetState extends State<PlaceholderWidget> {
   String _name = "";
 
-  _getName() {
-    DataFetcher.nameAbbreviated("usercook").then((val) => setState(() {
+  void loadData() {
+    DataFetcher.foodName("1yzdDBacqdeRxewvuczy").then((val) => setState(() {
       _name = val;
     }));
   }
 
   _PlaceholderWidgetState(){
-    _getName();
+    loadData();
   }
 
   @override
