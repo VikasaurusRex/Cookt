@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+
+import 'package:cookt/properties.dart';
 
 class FoodItem {
 
-  static final double cooktPercent = 0.05;
+  static final cooktPercent = Properties.cooktPercentage;
 
-  List<dynamic> categories;
+  List<String> categories;
   String description;
   bool dineInAvailable;
   bool isHosting;
-  List<dynamic> likedBy;
+  List<String> likedBy;
   String name;
   int numImages;
   double price;
@@ -59,7 +59,7 @@ class FoodItem {
         this.reference = null;
 
 
-  FoodItem.fromMap(Map<String, dynamic> map, {this.reference})
+  FoodItem.fromMap(Map<String, dynamic> map, {@required this.reference})
       :
         assert(map['categories'] != null),
         assert(map['description'] != null),
@@ -128,65 +128,4 @@ class FoodItem {
     return (other is FoodItem && other.reference == reference);
   }
 
-}
-
-class Review {
-  final int rating;
-  final String review;
-  final String userid;
-  final DateTime time;
-
-  final DocumentReference reference;
-
-  Review.fromMap(Map<String, dynamic> map, {this.reference}) :
-        assert(map['rating'] != null),
-        assert(map['review'] != null),
-        assert(map['userid'] != null),
-        assert(map['time'] != null),
-        this.rating = map['rating'],
-        this.review = map['review'],
-        this.userid = map['userid'],
-        this.time = map['time'];
-
-  Review.fromSnapshot(DocumentSnapshot snapshot)
-      : this.fromMap(snapshot.data, reference: snapshot.reference);
-
-  @override
-  String toString() => "$userid : $rating";
-
-  static void createReview(String review, int rating, FoodItem foodItem) {
-    Map<String, dynamic> map = Map();
-    map['rating'] = rating;
-    map['review'] = review;
-    map['userid'] = 'usercustomer';
-    map['time'] = DateTime.now();
-
-    foodItem.reference.collection('reviews').add(map);
-  }
-
-  void updateReview(String review, int rating) {
-    Map<String, dynamic> map = Map();
-    map['rating'] = rating;
-    map['review'] = review;
-    map['time'] = DateTime.now();
-
-    reference.updateData(map);
-  }
-
-  bool operator ==(other) {
-    return (other is Review && other.reference == reference);
-  }
-
-  Widget reviewerName(BuildContext context){
-    return StreamBuilder<Event>(
-      stream: FirebaseDatabase.instance.reference().child(userid).child('userinfo').onValue.asBroadcastStream(),
-      builder: (context, event) {
-        if (!event.hasData) return LinearProgressIndicator();
-        return Text(
-          '${event.data.snapshot.value['firstname']} ${event.data.snapshot.value['lastname'].toString().substring(0,1)}.',
-          style: Theme.of(context).textTheme.subhead,
-        );
-      },
-    );
-  }
 }

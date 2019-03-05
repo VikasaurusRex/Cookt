@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cookt/models/DataFetcher.dart';
 
+import 'package:cookt/models/orders/Order.dart';
+import 'package:cookt/models/foodItems/FoodItem.dart';
+
 class Profile extends StatefulWidget {
 
   Profile();
