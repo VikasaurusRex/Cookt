@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cookt/models/DataFetcher.dart';
+import 'package:cookt/models/DatabaseIntegrator.dart';
 
 import 'package:cookt/models/orders/Order.dart';
 import 'package:cookt/models/foodItems/FoodItem.dart';
@@ -82,7 +82,7 @@ class ProfileButton extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(4.0),
+      padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
       child: Container(
         height: 45,
         child: FlatButton(
@@ -92,7 +92,7 @@ class ProfileButton extends StatelessWidget{
           child: Row(
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.fromLTRB(0, 8, 20, 8),
+                padding: EdgeInsets.fromLTRB(10, 8, 20, 8),
                 child: Icon(icon, size: 30,),
               ),
               Expanded(

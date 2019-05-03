@@ -66,7 +66,7 @@
 //    await for (var snapshots in Firestore.instance
 //        .collection("orders")
 //        .where("cookID", isEqualTo: "usercook")
-//        .where("status", isEqualTo: "REQUESTED")
+//        .where("status", isEqualTo: Status.requested)
 //        .where("cancelled", isEqualTo: false)
 //        .snapshots().asBroadcastStream()) {
 //      for (int i = 0; i < snapshots.documentChanges.length; i++) {
@@ -84,7 +84,7 @@
 //    await for (var snapshots in Firestore.instance
 //        .collection("orders")
 //        .where("cookID", isEqualTo: "usercook")
-//        .where("status", isEqualTo: "ACCEPTED")
+//        .where("status", isEqualTo: Status.accepted)
 //        .where("cancelled", isEqualTo: false)
 //        .snapshots().asBroadcastStream()) {
 //      for (int i = 0; i < snapshots.documentChanges.length; i++) {
@@ -162,7 +162,7 @@
 //            },
 //            splashColor: Colors.greenAccent,
 //            child: Text(
-//              order.status == "ACCEPTED"?"Finish":"Accept",
+//              order.status == Status.accepted?"Finish":"Accept",
 //              style: Theme.of(context).textTheme.button.apply(color: Colors.green),
 //            ),
 //          ),
@@ -185,7 +185,7 @@
 //
 //
 //  void remove(Order order){
-//    if(order.status == "ACCEPTED"){
+//    if(order.status == Status.accepted){
 //      acceptedOrders.remove(order);
 //    }else{
 //      requestedOrders.remove(order);

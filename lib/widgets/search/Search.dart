@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'SearchCategories.dart';
+import 'FoodItemList.dart';
+
 
 class Search extends StatefulWidget {
 
@@ -13,7 +18,7 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
 
   bool isSearching = false;
-  TextEditingController searchField = TextEditingController();
+  TextEditingController searchField = TextEditingController(text: 'Burrito');
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +76,8 @@ class _SearchState extends State<Search> {
               onChanged: (text){
                 setState(() {
                   isSearching = true;
-                  searchField.text = text;
+                  // TODO: Remove Comment
+                  //searchField.text = text;
                 });
               },
             ),
@@ -82,10 +88,9 @@ class _SearchState extends State<Search> {
   }
 
   Widget _currentSearch(){
-    return Container(
-      child: Center(
-        child: Text(searchField.text),
-      ),
-    );
+    List<Query> searchComponents = [
+      Firestore.instance.collection('fooddata').where('name', isEqualTo: searchField.text)
+    ];
+    return FoodItemList(searchComponents, key: Key(searchComponents.toString()));
   }
 }

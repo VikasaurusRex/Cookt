@@ -8,11 +8,10 @@ class FoodItem {
 
   static final cooktPercent = Properties.cooktPercentage;
 
-  List<String> categories;
+  List<dynamic> categories;
   String description;
-  bool dineInAvailable;
   bool isHosting;
-  List<String> likedBy;
+  List<dynamic> likedBy;
   String name;
   int numImages;
   double price;
@@ -47,7 +46,6 @@ class FoodItem {
       :
         this.categories = [],
         this.description = '',
-        this.dineInAvailable = false,
         this.isHosting = false,
         this.likedBy = [],
         this.name = '',
@@ -63,7 +61,6 @@ class FoodItem {
       :
         assert(map['categories'] != null),
         assert(map['description'] != null),
-        assert(map['dineInAvailable'] != null),
         assert(map['isHosting'] != null),
         assert(map['likedBy'] != null),
         assert(map['name'] != null),
@@ -74,7 +71,6 @@ class FoodItem {
         assert(map['uid'] != null),
         this.categories = map['categories'],
         this.description = map['description'],
-        this.dineInAvailable = map['dineInAvailable'],
         this.isHosting = map['isHosting'],
         this.likedBy = map['likedBy'],
         this.name = map['name'],
@@ -94,7 +90,6 @@ class FoodItem {
     Map<String, dynamic> map = Map();
     map['categories'] = categories;
     map['description'] = description;
-    map['dineInAvailable'] = dineInAvailable;
     map['isHosting'] = isHosting;
     map['likedBy'] = likedBy;
     map['name'] = name;
@@ -111,7 +106,6 @@ class FoodItem {
     Map<String, dynamic> map = Map();
     map['categories'] = categories;
     map['description'] = description;
-    map['dineInAvailable'] = dineInAvailable;
     map['name'] = name;
     map['numImages'] = numImages;
     map['price'] = price;

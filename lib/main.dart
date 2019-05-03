@@ -5,11 +5,11 @@ import 'package:cookt/widgets/search/Search.dart';
 import 'package:cookt/widgets/orders/Orders.dart';
 import 'package:cookt/widgets/profile/Profile.dart';
 
-import 'package:cookt/widgets/browse/BrowseBar.dart';
-import 'package:cookt/widgets/profile/ProfileBar.dart';
+import 'package:cookt/widgets/sell/EditFoodItem.dart';
+import 'models/foodItems/FoodItem.dart';
 
-
-import 'package:cookt/models/DataFetcher.dart';
+import 'package:cookt/models/DatabaseIntegrator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() => runApp(MyApp());
 
@@ -21,6 +21,10 @@ class MyApp extends StatelessWidget {
       home: Home(),
       theme: ThemeData(
         //primarySwatch: Colors.red,
+        buttonTheme: ButtonThemeData(
+          padding: EdgeInsets.all(0),
+          layoutBehavior: ButtonBarLayoutBehavior.constrained,
+        ),
       ),
     );
   }
@@ -57,7 +61,7 @@ class _HomeState extends State<Home> {
     ];
 
     _children = [
-      PlaceholderWidget(Colors.transparent),
+      EditFoodItem(reference: null),// Firestore.instance.collection('fooddata').document('1yzdDBacqdeRxewvuczy'),), // PlaceholderWidget(Colors.red), //
       Search(),
       Orders(),
       Profile()

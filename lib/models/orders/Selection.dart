@@ -20,12 +20,20 @@ class Selection {
   @override
   String toString() => "$title $selections";
 
-  void updateItem(String review, int rating) {
+  void createSelection() {
     Map<String, dynamic> map = Map();
     map['title'] = title;
     map['selections'] = selections;
 
     reference.updateData(map);
+  }
+
+  void reorder(DocumentReference ref) async {
+    Map<String, dynamic> map = Map();
+    map['title'] = title;
+    map['selections'] = selections;
+
+    ref.collection('selections').add(map);
   }
 
   bool operator ==(other) {

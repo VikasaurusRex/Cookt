@@ -43,7 +43,7 @@
 //    await for (var snapshots in Firestore.instance
 //        .collection("orders")
 //        .where("customerID", isEqualTo: "usercustomer")
-//        .where("status", isEqualTo: "PENDING")
+//        .where("status", isEqualTo: Status.pending)
 //        .where("cancelled", isEqualTo: false)
 //        .snapshots().asBroadcastStream()) {
 //      for (int i = 0; i < snapshots.documentChanges.length; i++) {

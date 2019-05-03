@@ -25,6 +25,13 @@ class Option {
   Option.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
 
+  Option.newOption() :
+    this.maxSelection = 0,
+    this.options = ['Option Name'],
+    this.price = [0.0],
+    this.title = 'Selection Name',
+    this.reference = null;
+
   @override
   String toString() => "$title : $options";
 
