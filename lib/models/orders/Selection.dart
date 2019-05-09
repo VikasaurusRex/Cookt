@@ -12,7 +12,7 @@ class Selection {
         assert(map['title'] != null),
         assert(map['selections'] != null),
         this.title = map['title'],
-        this.selections = map['selections'];
+        this.selections = List<String>.from(map['selections']);
 
   Selection.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);

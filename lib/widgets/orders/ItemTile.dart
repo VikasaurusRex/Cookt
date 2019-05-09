@@ -23,7 +23,7 @@ class _ItemTileState extends State<ItemTile> {
   List<Selection> selections = List();
 
   void loadData(){
-    DataFetcher.foodName(item.foodID).then((val){
+    DatabaseIntegrator.foodName(item.foodID).then((val){
       setState(() {
         _itemName = val;
       });

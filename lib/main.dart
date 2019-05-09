@@ -61,7 +61,7 @@ class _HomeState extends State<Home> {
     ];
 
     _children = [
-      EditFoodItem(reference: null),// Firestore.instance.collection('fooddata').document('1yzdDBacqdeRxewvuczy'),), // PlaceholderWidget(Colors.red), //
+      EditFoodItem(reference: Firestore.instance.collection('fooddata').document('1yzdDBacqdeRxewvuczy'),), // PlaceholderWidget(Colors.red), //
       Search(),
       Orders(),
       Profile()
@@ -132,7 +132,7 @@ class _PlaceholderWidgetState extends State<PlaceholderWidget> {
   String _name = "";
 
   void loadData() {
-    DataFetcher.foodName("1yzdDBacqdeRxewvuczy").then((val) => setState(() {
+    DatabaseIntegrator.foodName("1yzdDBacqdeRxewvuczy").then((val) => setState(() {
       _name = val;
     }));
   }

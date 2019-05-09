@@ -25,7 +25,7 @@ class _FoodItemTileState extends State<FoodItemTile> {
     labels =List<dynamic>.from(item.categories);
     labels.insert(0, '\$${item.price.toStringAsFixed(2)}');
 
-    DataFetcher.nameFull(item.uid).then((name) => setState(() {
+    DatabaseIntegrator.nameFull(item.uid).then((name) => setState(() {
       _cookName = name;
     }));
   }
@@ -50,7 +50,7 @@ class _FoodItemTileState extends State<FoodItemTile> {
             children: <Widget>[
               AspectRatio(
                 aspectRatio: 2,
-                child: DataFetcher.foodImage(item.reference.documentID),
+                child: DatabaseIntegrator.foodImage(item.reference.documentID),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),

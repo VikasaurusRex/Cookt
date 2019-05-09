@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class DataFetcher{
+class DatabaseIntegrator{
 
   static Widget foodImage(String foodId) {
     if(foodId == null){
@@ -13,28 +13,6 @@ class DataFetcher{
     }
     return FutureBuilder(
         future: FirebaseStorage.instance.ref().child("foodpics").child("$foodId-0.png").getDownloadURL(),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> imageData) {
-          if(imageData.hasError || !imageData.hasData){
-            return Container(
-              color: Colors.grey,
-            );
-          }
-          return Image.network(
-            imageData.data.toString(),
-            fit: BoxFit.cover,
-          );
-        }
-    );
-  }
-
-  static Widget foodImageAt(String foodId, int imageNum) {
-    if(foodId == null){
-      return Container(
-        color: Colors.grey,
-      );
-    }
-    return FutureBuilder(
-        future: FirebaseStorage.instance.ref().child("foodpics").child("$foodId-$imageNum.png").getDownloadURL(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> imageData) {
           if(imageData.hasError || !imageData.hasData){
             return Container(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -18,40 +19,47 @@ class Option {
         assert(map['price'] != null),
         assert(map['title'] != null),
         this.maxSelection = map['maxSelection'],
-        this.options = map['options'],
-        this.price = map['price'],
+        this.options = List<String>.from(map['options']),
+        this.price = List<double>.from(List<dynamic>.from(map['price']).map((dbl) => dbl.toDouble()).toList()),
         this.title = map['title'];
 
   Option.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
 
   Option.newOption() :
-    this.maxSelection = 0,
-    this.options = ['Option Name'],
-    this.price = [0.0],
-    this.title = 'Selection Name',
+    this.maxSelection = 3,
+    this.options = ['Option 1', 'Option 2'],
+    this.price = [0.0, 0.0],
+    this.title = 'Option Title',
     this.reference = null;
 
   @override
   String toString() => "$title : $options";
 
-  static void createOption(String review, int rating, FoodItem foodItem) {
+  void createOption(CollectionReference ref) {
     Map<String, dynamic> map = Map();
-    map['rating'] = rating;
-    map['review'] = review;
-    map['userid'] = 'usercustomer';
-    map['time'] = DateTime.now();
+    map['maxSelection'] = maxSelection;
+    map['options'] = options;
+    map['price'] = price;
+    map['title'] = title;
 
-    foodItem.reference.collection('options').add(map);
+    ref.add(map);
   }
 
-  void updateReview(String review, int rating) {
+  void updateOption() {
     Map<String, dynamic> map = Map();
-    map['rating'] = rating;
-    map['review'] = review;
-    map['time'] = DateTime.now();
+    map['maxSelection'] = maxSelection;
+    map['options'] = options;
+    map['price'] = price;
+    map['title'] = title;
 
     reference.updateData(map);
+  }
+
+  void deleteOption(){
+    if(reference == null)
+      return;
+    reference.delete();
   }
 
   bool operator ==(other) {

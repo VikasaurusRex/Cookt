@@ -57,14 +57,14 @@ class _OrderTileState extends State<OrderTile> {
 
   void loadData(){
     
-    DataFetcher.dineInAvailable(order.cookID).then((val) => setState(() {
+    DatabaseIntegrator.dineInAvailable(order.cookID).then((val) => setState(() {
       if(val){
         availableOrderTypeLabels.add('Dine In');
         availableOrderTypes.add(OrderType.dineIn);
       }
     }));
 
-    DataFetcher.kitchenName(order.cookID).then((val) => setState(() {
+    DatabaseIntegrator.kitchenName(order.cookID).then((val) => setState(() {
       _kitchenName = val;
     }));
   }
@@ -278,7 +278,7 @@ class _OrderTileState extends State<OrderTile> {
             alignment: AlignmentDirectional.center,
             fit: StackFit.expand,
             children: <Widget>[
-              DataFetcher.storefrontImage(order.cookID),
+              DatabaseIntegrator.storefrontImage(order.cookID),
               Center(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),

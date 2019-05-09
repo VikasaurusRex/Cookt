@@ -6,8 +6,6 @@ import 'package:cookt/properties.dart';
 
 class FoodItem {
 
-  static final cooktPercent = Properties.cooktPercentage;
-
   List<dynamic> categories;
   String description;
   bool isHosting;
@@ -69,10 +67,10 @@ class FoodItem {
         assert(map['timeCreated'] != null),
         assert(map['timeUpdated'] != null),
         assert(map['uid'] != null),
-        this.categories = map['categories'],
+        this.categories = List<String>.from(map['categories']),
         this.description = map['description'],
         this.isHosting = map['isHosting'],
-        this.likedBy = map['likedBy'],
+        this.likedBy = List<String>.from(map['likedBy']),
         this.name = map['name'],
         this.numImages = map['numImages'],
         this.price = map['price'].toDouble(),

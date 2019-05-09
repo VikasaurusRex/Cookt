@@ -17,7 +17,7 @@ class _ProfileState extends State<Profile> {
   String userid;
 
   void loadData() {
-    DataFetcher.nameFull('usercook').then((val) => setState(() {
+    DatabaseIntegrator.nameFull('usercook').then((val) => setState(() {
       _name = val;
     }));
   }
@@ -45,7 +45,7 @@ class _ProfileState extends State<Profile> {
                   height: 100,
                   child: ClipRRect(
                     borderRadius: new BorderRadius.circular(MediaQuery.of(context).size.height),
-                    child: DataFetcher.userImage('usercook'),
+                    child: DatabaseIntegrator.userImage('usercook'),
                   ),
                 ),
                 Expanded(
