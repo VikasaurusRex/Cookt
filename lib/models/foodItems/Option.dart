@@ -27,7 +27,7 @@ class Option {
       : this.fromMap(snapshot.data, reference: snapshot.reference);
 
   Option.newOption() :
-    this.maxSelection = 3,
+    this.maxSelection = 2,
     this.options = ['Option 1', 'Option 2'],
     this.price = [0.0, 0.0],
     this.title = 'Option Title',

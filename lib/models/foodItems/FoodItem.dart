@@ -11,7 +11,7 @@ class FoodItem {
   bool isHosting;
   List<dynamic> likedBy;
   String name;
-  int numImages;
+  List<String> images;
   double price;
   DateTime timeCreated;
   DateTime timeUpdated;
@@ -47,7 +47,7 @@ class FoodItem {
         this.isHosting = false,
         this.likedBy = [],
         this.name = '',
-        this.numImages = 0,
+        this.images = [],
         this.price = 0,
         this.timeCreated = DateTime.now(),
         this.timeUpdated = DateTime.now(),
@@ -62,7 +62,6 @@ class FoodItem {
         assert(map['isHosting'] != null),
         assert(map['likedBy'] != null),
         assert(map['name'] != null),
-        assert(map['numImages'] != null),
         assert(map['price'] != null),
         assert(map['timeCreated'] != null),
         assert(map['timeUpdated'] != null),
@@ -72,7 +71,7 @@ class FoodItem {
         this.isHosting = map['isHosting'],
         this.likedBy = List<String>.from(map['likedBy']),
         this.name = map['name'],
-        this.numImages = map['numImages'],
+        this.images = List<String>.from(map['images']),
         this.price = map['price'].toDouble(),
         this.timeCreated = map['timeCreated'],
         this.timeUpdated = map['timeUpdated'],
@@ -91,7 +90,7 @@ class FoodItem {
     map['isHosting'] = isHosting;
     map['likedBy'] = likedBy;
     map['name'] = name;
-    map['numImages'] = numImages;
+    map['images'] = images;
     map['price'] = price;
     map['timeCreated'] = timeCreated;
     map['timeUpdated'] = timeUpdated;
@@ -105,7 +104,7 @@ class FoodItem {
     map['categories'] = categories;
     map['description'] = description;
     map['name'] = name;
-    map['numImages'] = numImages;
+    map['images'] = images;
     map['price'] = price;
     map['timeUpdated'] = DateTime.now();
 

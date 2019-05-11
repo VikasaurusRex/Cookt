@@ -28,6 +28,7 @@ dependencies:
   http: ^0.12.0+1
   location: ^1.4.1
   geocoder: ^0.1.2
+  random_string: ^0.0.2
 
 dev_dependencies:
   flutter_test:

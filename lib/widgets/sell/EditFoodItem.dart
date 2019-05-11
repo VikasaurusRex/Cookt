@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:random_string/random_string.dart';
 
 import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'package:cookt/models/foodItems/Option.dart';
@@ -22,8 +23,9 @@ class EditFoodItem extends StatefulWidget {
 class _EditFoodItemState extends State<EditFoodItem> {
   // One TextEditingController for each form input:
   FoodItem editableItem = FoodItem.newItem();
-  List<Image> images = List(6);
-  Map<int, File> changedImages = Map();
+  List<Image> images = List();
+  Map<String, File> addedImages = Map(); // Stores where they were added
+  List<String> removedImages = List();
   bool hasLoaded = false;
 
   TextEditingController nameController = TextEditingController();
@@ -41,20 +43,23 @@ class _EditFoodItemState extends State<EditFoodItem> {
           setState(() {
             editableItem = foodItem;
           });
-          for (int i = 0; i < foodItem.numImages; i++) {
+          foodItem.images.forEach((ref){
             FirebaseStorage.instance.ref().child("foodpics").child(
-                "${foodItem.reference.documentID}-$i.png")
+                "$ref.png")
                 .getDownloadURL()
                 .then((imageUrl) {
               Image image = Image.network(imageUrl.toString());
+              int index = foodItem.images.indexOf(ref);
               setState(() {
-                images[i] = image;
+                if(index > images.length)
+                  images.add(image);
+                else
+                  images.insert(index, image);
               });
             });
-          }
+          });
           widget.reference.collection('options').getDocuments().then((optionsSnapshots){
             optionsSnapshots.documents.forEach((snapshot){
-              print(snapshot);
               orderOptions.add(Option.fromSnapshot(snapshot));
             });
           });
@@ -93,7 +98,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
               Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:  0.0), child:
               Text('Options', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
               Column(
-                children: orderOptions.map((option) => _singleOptionEditor(option)).toList(),
+                children: orderOptions.map((option) => _singleOptionView(option)).toList(),
               ),
               Container(
                 height: 35.0,
@@ -213,14 +218,14 @@ class _EditFoodItemState extends State<EditFoodItem> {
               color: Colors.grey,
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image: images[index]!=null?images[index].image:NetworkImage('http://www.vikramhegde.org/transparent.png'),
+                image: index<images.length?images[index].image:NetworkImage('http://www.vikramhegde.org/transparent.png'),
               ),
             ),
             child: FlatButton(
               onPressed: (){
-                getImage(index: index);
+                imageTileTapped(index: index);
               },
-              child: images[index]!=null?null:Icon(Icons.photo,color: Colors.black45,),
+              child: index<images.length?null:Icon(Icons.photo,color: Colors.black45,),
             ),
           ),
         )
@@ -228,16 +233,39 @@ class _EditFoodItemState extends State<EditFoodItem> {
   }
 
   //TODO: Remove Images
-  void getImage({@required int index}) async {
+  void imageTileTapped({@required int index}) {
+    if(index<images.length){
+      _changeDeleteImage(index);
+      return;
+    }
+    getImage(index);
+  }
+
+  void getImage(int index) async {
     File image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    String newImageName = randomAlphaNumeric(15);
     if(image != null) {
-      print('Changing at $index out of ${editableItem.numImages} total Images');
+      print('Changing at $index out of ${editableItem.images.length} total Images');
       setState(() {
-        images[index > editableItem.numImages ? editableItem.numImages : index] = Image.file(image);
+        if (index > images.length){
+          images.add(Image.file(image));
+        }else {
+          images.removeAt(index);
+          images.insert(index, Image.file(image));
+        }
       });
-      changedImages[index>editableItem.numImages?editableItem.numImages:index] = image;
-      editableItem.numImages+=index>=editableItem.numImages?1:0;
-      print('Number of images: ${editableItem.numImages}');
+      if(index < editableItem.images.length) {
+        String imageName = editableItem.images.removeAt(index);
+        if(addedImages.keys.contains(imageName))
+          addedImages.remove(imageName);
+        else
+          removedImages.add(imageName);
+      }
+      editableItem.images.insert(index > editableItem.images.length ? editableItem.images.length : index, newImageName);
+      addedImages[newImageName] = image;
+      print('Editable Item Image Refs: ${editableItem.images}');
+      print('Added Images: ${addedImages.length}');
+      print('Removed Images: $removedImages');
     }
   }
 
@@ -355,16 +383,17 @@ class _EditFoodItemState extends State<EditFoodItem> {
     return true;
   }
 
-  Widget _singleOptionEditor(Option option){
+  Widget _singleOptionView(Option option){
 //    TextEditingController optionTitleController = TextEditingController();
 //    optionTitleController.text = option.title;
 //    List<TextEditingController> optionsControllers = List<TextEditingController>(option.options.length);
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Row(
           children: <Widget>[
             Expanded(
-              child: Text('${option.title}', style: Theme.of(context).textTheme.subhead.apply(fontSizeFactor: 1.1)),
+              child: Text('${option.title}', style: Theme.of(context).textTheme.subhead.apply(fontSizeFactor: 1.1, fontWeightDelta: 2)),
             ),
             IconButton(
               onPressed: (){
@@ -380,6 +409,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
             ),
           ],
         ),
+        Text('Maximum Selections: ${option.maxSelection}', style: Theme.of(context).textTheme.subhead, textAlign: TextAlign.right,),
         Padding(
           padding: EdgeInsets.all(8.0),
           child: Column(
@@ -421,6 +451,12 @@ class _EditFoodItemState extends State<EditFoodItem> {
                     optionTitleController.text = text;
                   });
                 },
+                onChanged: (text){
+                  option.title = text;
+                  setState(() {
+                    optionTitleController.text = text;
+                  });
+                },
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 0),
                   icon: Icon(Icons.title),
@@ -446,7 +482,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
                       child: Icon(Icons.remove),
                     ),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4.0),
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(option.maxSelection.toString(), style: Theme.of(context).textTheme.subhead),
                     ),
                     InkWell(
@@ -479,9 +515,15 @@ class _EditFoodItemState extends State<EditFoodItem> {
                             child: TextField(
                               controller: optionsControllers[i],
                               onSubmitted: (text){
-                                option.options[i] = text;
                                 setState(() {
                                   optionsControllers[i].text = text;
+                                  option.options[i] = text;
+                                });
+                              },
+                              onChanged: (text){
+                                setState(() {
+                                  optionsControllers[i].text = text;
+                                  option.options[i] = text;
                                 });
                               },
                               decoration: InputDecoration(
@@ -499,8 +541,14 @@ class _EditFoodItemState extends State<EditFoodItem> {
                               keyboardType: TextInputType.numberWithOptions(signed: true, decimal: true),
                               controller: priceControllers[i],
                               onSubmitted: (text){
-                                option.price[i] = isNum(text)? double.parse(double.parse(text).toStringAsFixed(2)):0.0;
                                 setState(() {
+                                  option.price[i] = isNum(text)? double.parse(double.parse(text).toStringAsFixed(2)):0.0;
+                                  priceControllers[i].text = isNum(text)?double.parse(text).toStringAsFixed(2):'0.00';
+                                });
+                              },
+                              onChanged:  (text){
+                                setState(() {
+                                  option.price[i] = isNum(text)? double.parse(double.parse(text).toStringAsFixed(2)):0.0;
                                   priceControllers[i].text = isNum(text)?double.parse(text).toStringAsFixed(2):'0.00';
                                 });
                               },
@@ -557,6 +605,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
             FlatButton(
               child: Text('Ok'),
               onPressed: () {
+
                 Navigator.of(context).pop();
               },
             ),
@@ -582,10 +631,24 @@ class _EditFoodItemState extends State<EditFoodItem> {
       editableItem.updateListingWithData(editableItem.reference);
     }
 
-    changedImages.forEach((i, imageFile) {
-      print(i);
-      FirebaseStorage.instance.ref().child('foodpics').child('${editableItem.reference.documentID}-$i.png').putFile(imageFile);
+    removedImages.forEach((imageName){
+      FirebaseStorage.instance.ref().child('foodpics').child(
+          '${imageName}.png').delete();
     });
+
+    addedImages.forEach((name, file){
+      FirebaseStorage.instance.ref().child('foodpics').child(
+          '$name.png').putFile(file);
+    });
+
+    //FirebaseStorage.instance.ref().child('foodpics').child(
+    //            '${editableItem.reference.documentID}-$i.png').putFile(imageFile);
+
+//    for(int i = editableItem.numImages; i < 6; i++){
+//      FirebaseStorage.instance.ref().child('foodpics').child(
+//          '${editableItem.reference.documentID}-$i.png').delete();
+//
+//    }
 
     orderOptions.forEach((option) {
       if (option.reference != null) {
@@ -670,11 +733,56 @@ class _EditFoodItemState extends State<EditFoodItem> {
     );
   }
 
+  Future<void> _changeDeleteImage(int index) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Image already selected.'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Would you like to edit the image?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Delete'),
+              onPressed: () {
+                //TODO: Remove an Image from Model
+                setState(() {
+                  images.removeAt(index);
+                });
+                String imageName = editableItem.images.removeAt(index);
+                if(addedImages.keys.contains(imageName))
+                  addedImages.remove(imageName);
+                else
+                  removedImages.add(imageName);
+                print('Editable Item Image Refs: ${editableItem.images}');
+                print('Added Images: ${addedImages.length}');
+                print('Removed Images: $removedImages');
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Change'),
+              onPressed: (){
+                getImage(index);
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Cancel'),
+              onPressed: (){
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }
-
-
-// TODO: delete
-//decoration: BoxDecoration(
-//        border: Border.all(color: Colors.grey),
-//        borderRadius: BorderRadius.circular(5.0),
-//      ),
