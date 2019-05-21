@@ -5,17 +5,17 @@ import 'package:cookt/widgets/search/Search.dart';
 import 'package:cookt/widgets/orders/Orders.dart';
 import 'package:cookt/widgets/profile/Profile.dart';
 
-import 'package:cookt/widgets/sell/EditFoodItem.dart';
-import 'models/foodItems/FoodItem.dart';
+import 'package:cookt/widgets/sell/SaleHome.dart';
 
 import 'package:cookt/models/DatabaseIntegrator.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
+
     return MaterialApp(
       title: "Cookt",
       home: Home(),
@@ -40,10 +40,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   int _currentIndex = 0;
-  int _currentSpecializedIndex = -1; // For more specialized widget homes
 
   List<Widget> _children;
-  List<Widget> _specializedChildren;
   List<Widget> _appBars;
 
   Map<String, int> _specializedIndices = Map();
@@ -61,7 +59,7 @@ class _HomeState extends State<Home> {
     ];
 
     _children = [
-      EditFoodItem(reference: Firestore.instance.collection('fooddata').document('1yzdDBacqdeRxewvuczy'),), //PlaceholderWidget(Colors.red), //
+      PlaceholderWidget(Colors.red),
       Search(),
       Orders(),
       Profile()
@@ -69,7 +67,7 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       appBar: _appBars[_currentIndex]==null?null:AppBar(title: _appBars[_currentIndex]),//_appBars[_currentIndex],
-      body: _currentSpecializedIndex>=0?_specializedChildren[_currentSpecializedIndex]:_children[_currentIndex], // new
+      body: _children[_currentIndex], // new
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         onTap: onTabTapped, // new
@@ -101,7 +99,6 @@ class _HomeState extends State<Home> {
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
-      _currentSpecializedIndex = -1;
     });
   }
 

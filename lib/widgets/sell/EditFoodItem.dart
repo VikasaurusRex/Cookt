@@ -247,7 +247,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
     if(image != null) {
       print('Changing at $index out of ${editableItem.images.length} total Images');
       setState(() {
-        if (index > images.length){
+        if (index >= images.length){
           images.add(Image.file(image));
         }else {
           images.removeAt(index);
@@ -549,7 +549,8 @@ class _EditFoodItemState extends State<EditFoodItem> {
                               onChanged:  (text){
                                 setState(() {
                                   option.price[i] = isNum(text)? double.parse(double.parse(text).toStringAsFixed(2)):0.0;
-                                  priceControllers[i].text = isNum(text)?double.parse(text).toStringAsFixed(2):'0.00';
+                                  //TODO: Delete comment
+                                  //priceControllers[i].text = isNum(text)?double.parse(text).toStringAsFixed(2):'0.00';
                                 });
                               },
                               decoration: InputDecoration(
@@ -623,7 +624,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
       return;
     }
 
-    if(widget.reference == null) {
+    if(editableItem.reference == null) {
       Future<DocumentReference> ref = editableItem.createListing();
       editableItem.reference = await ref;
     } else {
@@ -674,7 +675,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
-        return CupertinoAlertDialog(
+        return AlertDialog(
           title: Text('Error'),
           content: SingleChildScrollView(
             child: ListBody(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cookt/models/foodItems/FoodItem.dart';
-import 'SearchCategories.dart';
+import 'CategoryTile.dart';
 import 'FoodItemList.dart';
 
 
@@ -26,7 +26,23 @@ class _SearchState extends State<Search> {
       appBar: AppBar(
         title: _searchBar(),
       ),
-      body: isSearching? _currentSearch():SearchHome(),
+      body: isSearching? _currentSearch()
+          :
+      Container(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+          child: GridView.count(
+            crossAxisCount: 2,
+            childAspectRatio: 2,
+            children: FoodItem.allCategories.map((category) => CategoryTile(category, (){
+              setState(() {
+                searchField.text = category;
+                isSearching = true;
+              });
+            })).toList(),
+          ),
+        ),
+      ),
     );
   }
 
@@ -62,6 +78,7 @@ class _SearchState extends State<Search> {
           ),
           Expanded(
             child: TextField(
+              textCapitalization: TextCapitalization.words,
               controller: searchField,
               decoration: InputDecoration(
                   border: InputBorder.none,
@@ -76,8 +93,8 @@ class _SearchState extends State<Search> {
               onChanged: (text){
                 setState(() {
                   isSearching = true;
-                  // TODO: Remove Comment
-                  //searchField.text = text;
+                  searchField.text = text;
+                  print('Search Bar: $text');
                 });
               },
             ),
@@ -89,8 +106,19 @@ class _SearchState extends State<Search> {
 
   Widget _currentSearch(){
     List<Query> searchComponents = [
-      Firestore.instance.collection('fooddata').where('name', isEqualTo: searchField.text)
+      Firestore.instance.collection('fooddata').where('name', isEqualTo: searchField.text),
+      Firestore.instance.collection('fooddata').where('categories', arrayContains: searchField.text),
+      Firestore.instance.collection('fooddata').where('price', isLessThanOrEqualTo: isNum(searchField.text)?double.parse(searchField.text):-0.1),
     ];
-    return FoodItemList(searchComponents, key: Key(searchComponents.toString()));
+    return FoodItemList(searchComponents, key: Key(searchField.text));
+  }
+
+  bool isNum(String text){
+    try{
+      var value = double.parse(text);
+    } on FormatException {
+      return false;
+    }
+    return true;
   }
 }

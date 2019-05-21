@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:io';
 
 import 'package:location/location.dart';
 import 'dart:convert';
@@ -48,7 +49,9 @@ class _OrderTileState extends State<OrderTile> {
   List<String> availableOrderTypes = [OrderType.pickup];
   int selectedOrderTypeIndex = 0;
 
-  String _totalPrice = "";
+  double _taxRate = 0;
+  double _cooktRate = 0;
+  double _deliveryQuote = 0;
   String _kitchenName = "";
 
   bool shouldLoadLocation = true;
@@ -56,65 +59,32 @@ class _OrderTileState extends State<OrderTile> {
   LatLng cookCoords = null;
 
   void loadData(){
-    
-    DatabaseIntegrator.dineInAvailable(order.cookID).then((val) => setState(() {
-      if(val){
-        availableOrderTypeLabels.add('Dine In');
-        availableOrderTypes.add(OrderType.dineIn);
-      }
-    }));
-
     DatabaseIntegrator.kitchenName(order.cookID).then((val) => setState(() {
       _kitchenName = val;
     }));
   }
 
-  String simplifiedDate(DateTime date){
-    String month;
-
-    switch (date.month){
-      case 1: { month = 'Jan'; }
-      break;
-      case 2: { month = 'Feb'; }
-      break;
-      case 3: { month = 'Mar'; }
-      break;
-      case 4: { month = 'Apr'; }
-      break;
-      case 5: { month = 'May'; }
-      break;
-      case 6: { month = 'June'; }
-      break;
-      case 7: { month = 'July'; }
-      break;
-      case 8: { month = 'Aug'; }
-      break;
-      case 9: { month = 'Sep'; }
-      break;
-      case 10: { month = 'Oct'; }
-      break;
-      case 11: { month = 'Nov'; }
-      break;
-      case 12: { month = 'Dec'; }
-      break;
-      default: { month = '---'; }
-      break;
-    }
-
-    return '${month} ${date.day}, ${date.year} at ${date.hour%12==0?'12':date.hour%12}:${date.minute} ${date.hour>11?'PM':'AM'}';
-  }
-
   void calculatePrice(){
     double price = 0;
+
     items.forEach((item){
-      price += item.price;
+      price += item.price*item.quantity;
     });
-    if(order.orderType == OrderType.postmates){
-      price+=order.deliveryPrice;
-    }
     setState(() {
-      _totalPrice = '${price.toStringAsFixed(2)}';
+      order.subtotalPrice = price;
+      order.cooktPrice = (price*_cooktRate);
+      order.taxPrice = (price*_taxRate);
     });
+
+    price += order.cooktPrice;
+    price += order.taxPrice;
+    if(order.orderType == OrderType.postmates){
+      order.deliveryPrice = _deliveryQuote;
+      price+=order.deliveryPrice;
+    }else{
+      order.deliveryPrice = 0;
+    }
+    order.totalPrice = price;
   }
 
   void loadLocation() async{
@@ -161,26 +131,62 @@ class _OrderTileState extends State<OrderTile> {
     body['pickup_address'] = '${cookAddress.addressLine}';
     body['dropoff_address'] = '${myAddress.addressLine}';
 
+    updateTax(zip: cookAddress.postalCode);
+
     http.post(url,headers: headers,body: body).then((response){
       Map<String, dynamic> quote = jsonDecode(response.body);
       if(quote['kind'] == 'error'){
         return;
       }else if(quote['kind'] == 'delivery_quote'){
         setState(() {
-          order.setDeliveryPrice(quote['fee'].toDouble()/100);
-          availableOrderTypeLabels.add('Delivery (+\$${order.deliveryPrice.toStringAsFixed(2)})');
+          _deliveryQuote = quote['fee'].toDouble()/100;
+          availableOrderTypeLabels.add('Delivery (+\$${_deliveryQuote.toStringAsFixed(2)})');
           availableOrderTypes.add(OrderType.postmates);
         });
       }
     });
   }
 
+  void updateTax({String zip}){
+    String url = 'https://api.taxjar.com/v2/rates/$zip';
+
+    Map<String, String> headers = Map();
+    headers['Authorization'] = 'Bearer 0fa76332396eaec7be5f9c63c143fc5e';
+    headers['Content-Type'] = 'application/json';
+
+    http.get(url,headers: headers).then((response){
+      Map<String, dynamic> quote = jsonDecode(response.body);
+      if(quote['rate'] == null){
+        return;
+      }else{
+        _taxRate = double.parse(quote['rate']['combined_rate']);
+        order.taxZip = zip;
+        calculatePrice();
+      }
+    });
+  }
+
+  void refresh(){
+    DatabaseIntegrator.cooktTake().then((val) => setState(() {
+      _cooktRate = val;
+      calculatePrice();
+    }));
+
+    DatabaseIntegrator.dineInAvailable(order.cookID).then((val) => setState(() {
+      if(val){
+        availableOrderTypeLabels.add('Dine In');
+        availableOrderTypes.add(OrderType.dineIn);
+      }
+    }));
+  }
+
   _OrderTileState(this.order){
     loadData();
-    loadLocation();
 
     if(order.status == Status.pending) {
       order.refresh();
+      refresh();
+      loadLocation();
     }
 
     _status[Status.pending] = 'Order is Pending';
@@ -198,14 +204,14 @@ class _OrderTileState extends State<OrderTile> {
     _time[Status.pending] = 'Select a time below to order';
     _time[Status.requested] = 'Your order has been sent for confirmation.';
     if(order.orderType == OrderType.pickup){
-      _time[Status.accepted] = 'Ready for pickup at ${simplifiedDate(order.pickupTime.toLocal())}';
+      _time[Status.accepted] = 'Ready for pickup at ${DatabaseIntegrator.simplifiedDate(order.pickupTime.toLocal())}';
     }else if(order.orderType == OrderType.dineIn){
-      _time[Status.accepted] = 'Reservation at ${simplifiedDate(order.pickupTime.toLocal())}';
+      _time[Status.accepted] = 'Reservation at ${DatabaseIntegrator.simplifiedDate(order.pickupTime.toLocal())}';
     }else{
-      _time[Status.accepted] = 'Order will be delivered at ${simplifiedDate(order.pickupTime.toLocal())}';
+      _time[Status.accepted] = 'Order will be delivered at ${DatabaseIntegrator.simplifiedDate(order.pickupTime.toLocal())}';
     }
-    _time['CANCELLED'] = 'Order was cancelled at ${simplifiedDate(order.lastTouchedTime.toLocal())}';
-    _time[Status.finished] = '${simplifiedDate(order.lastTouchedTime.toLocal())}';
+    _time['CANCELLED'] = 'Order was cancelled at ${DatabaseIntegrator.simplifiedDate(order.lastTouchedTime.toLocal())}';
+    _time[Status.finished] = '${DatabaseIntegrator.simplifiedDate(order.lastTouchedTime.toLocal())}';
 
     order.reference.collection('items').snapshots().forEach((querySnapshot){
       querySnapshot.documents.forEach((snapshot){
@@ -214,7 +220,8 @@ class _OrderTileState extends State<OrderTile> {
           setState(() {
             items.add(Item.fromSnapshot(snapshot));
           });
-          calculatePrice();
+          if(order.status == Status.pending)
+            calculatePrice();
         }
       });
     });
@@ -224,7 +231,6 @@ class _OrderTileState extends State<OrderTile> {
   Widget build(BuildContext context) {
     //print('  Number of items in order: ${items.length}');
     return Container(
-        //color: Colors.black12,
       child: Padding(
         padding: EdgeInsets.fromLTRB(8.0, 8, 8, 8),
         child: Column(
@@ -236,9 +242,13 @@ class _OrderTileState extends State<OrderTile> {
               padding: EdgeInsets.symmetric(vertical: 8.0),
               child: Text((order.status != Status.finished && order.active == false)? _time['CANCELLED'] :_time[order.status], style: Theme.of(context).textTheme.subhead.apply(fontSizeFactor: 0.75),),
             ),
-            Container(
-              color: Colors.grey,
-              height: 1.0,
+            _orderOptions(),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+              child: Container(
+                color: Colors.grey,
+                height: 1.0,
+              ),
             ),
             Padding(
               padding: EdgeInsets.symmetric(vertical: 4.0),
@@ -251,14 +261,8 @@ class _OrderTileState extends State<OrderTile> {
               height: 1.0,
             ),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('Total: \$$_totalPrice', style: Theme.of(context).textTheme.title,),
-                  _inLineOptions(),
-                ],
-              )
+              padding: EdgeInsets.symmetric(vertical: 4.0),
+              child: _priceBreakdown(),
             ),
             _nextLineOptions(),
             Container(
@@ -324,9 +328,12 @@ class _OrderTileState extends State<OrderTile> {
     );
   }
 
-  Widget _inLineOptions(){
+  Widget _orderOptions(){
     return Row(
       children: <Widget>[
+        Expanded(
+          child: Container(),
+        ),
         Text('For: ', style: Theme.of(context).textTheme.subtitle,),
         order.status == Status.pending && order.active == true?Icon(
           Icons.chevron_right,
@@ -341,15 +348,14 @@ class _OrderTileState extends State<OrderTile> {
             calculatePrice();
           }:null,
           child: Container(
-            decoration: order.status == Status.pending && order.active == true?BoxDecoration(
-              border: Border.all(color: Colors.black),
+            decoration: BoxDecoration(
+              color: order.status == Status.pending && order.active == true?Color(0xFFCCFFCC):Colors.transparent,
               borderRadius: BorderRadius.circular(5.0),
-            ):null,
-            child: Padding(
-              padding: EdgeInsets.all(4),
+            ),
+            child: Padding(padding: EdgeInsets.all(4),
               child: Text(availableOrderTypeLabels[selectedOrderTypeIndex], style: Theme.of(context).textTheme.subtitle),
             ),
-          ),
+          )
         ),
         order.status == Status.pending && order.active == true?Icon(
           Icons.chevron_left,
@@ -358,17 +364,37 @@ class _OrderTileState extends State<OrderTile> {
     );
   }
 
+  Widget _priceBreakdown(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        //TODO: Implement proper pricing for cookt fee, total fee, and tax
+        Text('Subtotal: \$${order.subtotalPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
+        Text('Tax: \$${order.taxPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
+        Text('Cookt Fee: \$${order.cooktPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
+        Text('Delivery: \$${order.deliveryPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
+        Padding(padding: EdgeInsets.symmetric(vertical: 2.0),),
+        Container(
+          height: 1,
+          color: Colors.grey,
+        ),
+        Padding(padding: EdgeInsets.symmetric(vertical: 2.0),),
+        Text('Total: \$${order.totalPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead.apply(fontSizeFactor: 1.2, fontWeightDelta: 2),textAlign: TextAlign.right,),
+      ],
+    );
+  }
+
   Widget _nextLineOptions(){
     if(order.status != Status.finished && order.active == false) {
-      return FlatButton(
-          color: Colors.black12,
-          onPressed: (){
-            widget.reorder(order);
-          },
-          child: Text(
-            'Reorder',
-            style: Theme.of(context).textTheme.title,
-          )
+      return RaisedButton(
+        color: Color(0xFFCCFFCC),
+        onPressed: (){
+          widget.reorder(order);
+        },
+        child: Text(
+          'Reorder',
+          style: Theme.of(context).textTheme.title.apply(color: Colors.green),
+        )
       );
     }
 
@@ -385,6 +411,7 @@ class _OrderTileState extends State<OrderTile> {
                   width: 50,
                   height: 30,
                   child: FlatButton(
+                    color: Color(0xFFEFEFEF),
                     onPressed: (){
                       changeOrderTime(increase: false);
                     },
@@ -394,7 +421,7 @@ class _OrderTileState extends State<OrderTile> {
                 Expanded(
                   child: Center(
                     child: Text(
-                      '${order.pickupTime.day == DateTime.now().day? 'Today':dayOfTheWeek(order.pickupTime.weekday)} ${order.pickupTime.hour>12?order.pickupTime.hour-12:order.pickupTime.hour==0?12:order.pickupTime.hour}:${order.pickupTime.minute==0?'00':'30'} ${order.pickupTime.hour>=12?'PM':'AM'}',
+                      '${order.pickupTime.day == DateTime.now().day? 'Today':DatabaseIntegrator.dayOfTheWeek(order.pickupTime.weekday)} ${order.pickupTime.hour>12?order.pickupTime.hour-12:order.pickupTime.hour==0?12:order.pickupTime.hour}:${order.pickupTime.minute==0?'00':'30'} ${order.pickupTime.hour>=12?'PM':'AM'}',
                       style: Theme.of(context).textTheme.title,),
                   ),
                 ),
@@ -402,6 +429,7 @@ class _OrderTileState extends State<OrderTile> {
                   width: 50,
                   height: 30,
                   child: FlatButton(
+                    color: Color(0xFFEFEFEF),
                     onPressed: (){
                       changeOrderTime(increase: true);
                     },
@@ -411,79 +439,61 @@ class _OrderTileState extends State<OrderTile> {
                 Padding(padding: EdgeInsets.all(5),),
               ],
             ),
-            FlatButton(
-              color: Colors.black12,
+            RaisedButton(
+              color: Color(0xFFCCFFCC),
               onPressed: (){
-                widget.placeOrder(order);
+                if(_taxRate > 0 && _cooktRate > 0 && ((order.orderType == OrderType.postmates && order.deliveryPrice > 0) || order.orderType != OrderType.postmates))
+                  widget.placeOrder(order);
+                else
+                  _networkErrorDialog();
               },
               child: Text(
                 'Place Order',
-                style: Theme.of(context).textTheme.title,
+                style: Theme.of(context).textTheme.title.apply(color: Colors.green),
               ),
             )
           ],
         );
         break;
       case Status.requested:
-        return FlatButton(
-          color: Colors.black12,
+        return RaisedButton(
+            color: Color(0xFFFFCCCC),
           onPressed: (){
             widget.cancelOrder(order);
           },
           child: Text(
             'Cancel',
-            style: Theme.of(context).textTheme.title,
+            style: Theme.of(context).textTheme.title.apply(color: Colors.red),
           )
         );
         break;
       case Status.accepted:
-        return FlatButton(
-            color: Colors.black12,
+        return RaisedButton(
+            color: Color(0xFFFFCCCC),
             onPressed: (){
               widget.cancelOrder(order);
             },
             child: Text(
               'Cancel (Possible Fee)',
-              style: Theme.of(context).textTheme.title,
+              style: Theme.of(context).textTheme.title.apply(color: Colors.red),
             )
         );
         break;
       case Status.finished:
-        return FlatButton(
-            color: Colors.black12,
+        return RaisedButton(
+            color: Color(0xFFCCFFCC),
             onPressed: (){
               widget.reorder(order);
             },
             child: Text(
               'Reorder',
-              style: Theme.of(context).textTheme.title,
+              style: Theme.of(context).textTheme.title.apply(color: Colors.green),
             )
         );
         break;
       default:
         return Container();
         break;
-    }
-  }
-
-  String dayOfTheWeek(int weekday){
-    switch(weekday){
-      case 1:
-        return 'Monday';
-      case 2:
-        return 'Tuesday';
-      case 3:
-        return 'Wednesday';
-      case 4:
-        return 'Thursday';
-      case 5:
-        return 'Friday';
-      case 6:
-        return 'Saturday';
-      case 7:
-        return 'Sunday';
-      default:
-        return 'ERROR';
     }
   }
 
@@ -510,5 +520,32 @@ class _OrderTileState extends State<OrderTile> {
         widget.deleteOrder(order);
       }
     });
+  }
+
+  Future<void> _networkErrorDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error Loading Taxes and Fees. Are you connected to the internet?'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Please connect to the network or wait for the fields to load.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

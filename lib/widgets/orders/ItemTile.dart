@@ -61,31 +61,31 @@ class _ItemTileState extends State<ItemTile> {
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('${item.quantity.toString()}', style: Theme.of(context).textTheme.title,),
-                    ),
-                  ),
+//                  Container(
+////                    decoration: BoxDecoration(
+////                      border: Border.all(color: Colors.grey),
+////                      borderRadius: BorderRadius.circular(5.0),
+////                    ),
+//                    child: Padding(
+//                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+//                      child: Text('${item.quantity.toString()}x', style: Theme.of(context).textTheme.subhead,),
+//                    ),
+//                  ),
                   Expanded(
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('${_itemName}${item.quantity>1?'s':''}', style: Theme.of(context).textTheme.title,),
+                      child: Text('${_itemName}  ${item.quantity>1?'(${item.quantity}x @ ${(item.price).toStringAsFixed(2)})':''}', style: Theme.of(context).textTheme.title,),
                     ),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('\$${item.price.toStringAsFixed(2)}', style: Theme.of(context).textTheme.title,),
+                    child: Text('\$${(item.price*item.quantity.toDouble()).toStringAsFixed(2)}', style: Theme.of(context).textTheme.title,),
                   ),
                 ],
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(35.0, 0.0, 0, 0.0),
-                child: Column(
+                padding: EdgeInsets.fromLTRB(20.0, 0.0, 0, 0.0),
+                child:Column(
                   children: selections.map((selection) => SelectionTile(selection)).toList(),
                 ),
               ),
@@ -96,6 +96,8 @@ class _ItemTileState extends State<ItemTile> {
     );
   }
 }
+
+// TODO: Delete Items if a user doesnt want it anymore rather than deleting whole order.
 
 class SelectionTile extends StatelessWidget {
   final Selection selection;

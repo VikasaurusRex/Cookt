@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'package:cookt/models/orders/Item.dart';
 
 class Order {
@@ -16,7 +14,12 @@ class Order {
   DateTime completionTime; // actual Completion Time
   String orderType;
   String status;
+  double subtotalPrice;
+  double taxPrice;
+  double cooktPrice;
   double deliveryPrice;
+  double totalPrice;
+  String taxZip;
   bool active; // If false the order is either cancelled or finished.
                // If status == 'FINISHED' then its finished otherwise
                // its cancelled
@@ -34,7 +37,12 @@ class Order {
         this.completionTime = DateTime.fromMicrosecondsSinceEpoch(0),
         this.orderType = OrderType.pickup,
         this.status = Status.pending,
-        this.deliveryPrice = 0.00,
+        this.subtotalPrice = -1,
+        this.taxPrice = -1,
+        this.cooktPrice = -1,
+        this.deliveryPrice = -1,
+        this.totalPrice = -1,
+        this.taxZip = "00000",
         this.active = true,
         this.reference = null;
 
@@ -48,7 +56,12 @@ class Order {
         assert(map['completionTime'] != null),
         assert(map['orderType'] != null),
         assert(map['status'] != null),
+        assert(map['subtotalPrice'] != null),
+        assert(map['taxPrice'] != null),
+        assert(map['cooktPrice'] != null),
         assert(map['deliveryPrice'] != null),
+        assert(map['totalPrice'] != null),
+        assert(map['taxZip'] != null),
         assert(map['active'] != null),
         this.cookID = map['cookID'],
         this.customerID = map['customerID'],
@@ -59,14 +72,19 @@ class Order {
         this.completionTime = map['completionTime'],
         this.orderType = map['orderType'],
         this.status = map['status'],
+        this.subtotalPrice = map['subtotalPrice'].toDouble(),
+        this.taxPrice = map['taxPrice'].toDouble(),
+        this.cooktPrice = map['cooktPrice'].toDouble(),
         this.deliveryPrice = map['deliveryPrice'].toDouble(),
+        this.totalPrice = map['totalPrice'].toDouble(),
+        this.taxZip = map['taxZip'],
         this.active = map['active'];
 
   Order.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
 
   @override
-  String toString() => "$cookID $customerID ${reference.documentID} ${orderTime.millisecond} $status Order";
+  String toString() => "$cookID $customerID ${reference.documentID} $orderTime $status $lastTouchedID $active Order";
 
   void createListing() {
     Map<String, dynamic> map = Map();
@@ -79,18 +97,15 @@ class Order {
     map['completionTime'] = completionTime;
     map['orderType'] = orderType;
     map['status'] = Status.pending;
+    map['subtotalPrice'] = subtotalPrice;
+    map['taxPrice'] = taxPrice;
+    map['cooktPrice'] = cooktPrice;
     map['deliveryPrice'] = deliveryPrice;
+    map['totalPrice'] = totalPrice;
+    map['taxZip'] = taxZip;
     map['active'] = active;
 
     Firestore.instance.collection('orders').add(map);
-  }
-
-  void setDeliveryPrice(double price){
-    Map<String, dynamic> map = Map();
-    deliveryPrice = price;
-    map['deliveryPrice'] = deliveryPrice;
-
-    reference.updateData(map);
   }
 
   void acceptFinishOrder(){
@@ -104,7 +119,7 @@ class Order {
 
   void cancelOrder(){
     Map<String, dynamic> data  = Map();
-    data['lastTouchedID'] = 'usercustomer';
+    data['lastTouchedID'] = 'usercook';
     data['lastTouchedTime'] = DateTime.now();
     data['active'] = false;
 
@@ -118,14 +133,19 @@ class Order {
     map['pickupTime'] = pickupTime;
     map['orderType'] = orderType;
     map['status'] = Status.requested;
+    map['subtotalPrice'] = subtotalPrice;
+    map['taxPrice'] = taxPrice;
+    map['cooktPrice'] = cooktPrice;
     map['deliveryPrice'] = deliveryPrice;
+    map['totalPrice'] = totalPrice;
+    map['taxZip'] = taxZip;
 
     reference.updateData(map);
   }
 
   // TODO: Remove Comment
   void deleteOrder(){
-    print('Deleting Order');
+    print('Deleting Order from Database');
     //reference.delete();
   }
 
@@ -141,8 +161,13 @@ class Order {
     map['completionTime'] = DateTime.fromMicrosecondsSinceEpoch(0);
     map['orderType'] = OrderType.pickup;
     map['status'] = Status.pending;
-    map['deliveryPrice'] = 0.00;
+    map['subtotalPrice'] = -1;
+    map['taxPrice'] = -1;
+    map['cooktPrice'] = -1;
+    map['deliveryPrice'] = -1;
+    map['totalPrice'] = -1;
     map['active'] = true;
+    map['taxZip'] = "00000";
 
     DocumentReference newRef = await Firestore.instance.collection('orders').add(map);
 

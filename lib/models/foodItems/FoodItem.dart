@@ -101,6 +101,9 @@ class FoodItem {
 
   void updateListingWithData(DocumentReference ref) {
     Map<String, dynamic> map = Map();
+    if(price < 0){
+      price = 0;
+    }
     map['categories'] = categories;
     map['description'] = description;
     map['name'] = name;

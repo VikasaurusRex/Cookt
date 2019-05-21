@@ -23,6 +23,12 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
   _OrderListState(this.query){
     query.snapshots().listen((querySnapshot) {
       setState(() {
+        // TODO: Remove Comment and Code
+//        querySnapshot.documents.forEach((doc){
+//          Map<String, dynamic> map = Map();
+//          map['totalPrice'] = 35.00;
+//          doc.reference.updateData(map);
+//        });
         orders = querySnapshot.documents.map((snapshot) => Order.fromSnapshot(snapshot)).toList();
       });
     });

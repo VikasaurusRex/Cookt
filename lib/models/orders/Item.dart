@@ -76,6 +76,13 @@ class Item {
     reference.updateData(data);
   }
 
+  void toggleItemPrepared(){
+    prepared = !prepared;
+    Map<String, dynamic> data  = Map();
+    data['prepared'] = prepared;
+    reference.updateData(data);
+  }
+
   void deleteItem(){
     print('Deleting Item');
     //reference.delete();

@@ -56,7 +56,7 @@ class _FoodItemListState extends State<FoodItemList> {
               Padding(
                 padding: EdgeInsets.all(20),
                 // TODO: Change Text
-                child: Text('Couldn\'t find anything, chief', style: Theme.of(context).textTheme.title.apply(color: Colors.grey),),
+                child: Text('Hmmm, couldn\'t find anything.', style: Theme.of(context).textTheme.title.apply(color: Colors.grey),),
               )
             ],
           ),

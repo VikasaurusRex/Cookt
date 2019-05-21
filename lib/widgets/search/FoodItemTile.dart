@@ -17,7 +17,7 @@ class FoodItemTile extends StatefulWidget {
 
 class _FoodItemTileState extends State<FoodItemTile> {
   final FoodItem item;
-  String _cookName = '';
+  String _cookName = 'Loading...';
 
   List<dynamic> labels;
 
@@ -50,7 +50,7 @@ class _FoodItemTileState extends State<FoodItemTile> {
             children: <Widget>[
               AspectRatio(
                 aspectRatio: 2,
-                child: DatabaseIntegrator.foodImage(item.reference.documentID),
+                child: DatabaseIntegrator.foodImage(item.images[0]),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
