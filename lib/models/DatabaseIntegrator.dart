@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_database/firebase_database.dart';
 
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 class DatabaseIntegrator{
 
   static Widget foodImage(String imageId) {
@@ -87,10 +89,18 @@ class DatabaseIntegrator{
 
   static Future<String> nameFull(String uid) async {
     DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(uid).get();
-    if(!snapshot.exists || snapshot.data['kitchenname'] == null){
+    if(!snapshot.exists){
       return 'No Name';
     }
     return '${snapshot.data['firstname']} ${snapshot.data['lastname']}';
+  }
+
+  static Future<LatLng> loc(String uid) async {
+    DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(uid).get();
+    if(!snapshot.exists || snapshot.data['kitchenname'] == null){
+      return null;
+    }
+    return LatLng(snapshot.data['lat'], snapshot.data['long']);
   }
 
   static Future<String> kitchenName(String uid) async {

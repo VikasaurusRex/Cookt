@@ -23,18 +23,13 @@ class _SaleHomeState extends State<SaleHome> {
   @override
   Widget build(BuildContext context) {
 
-    _appBars = [
-      null,
-      Text('My Food Items'),
-    ];
-
     _children = [
+      // TODO: Add Selections to SaleConsole
       SaleConsole(),
-      MyFoodItems(Colors.white),
+      MyFoodItems(),
     ];
 
     return Scaffold(
-      appBar: _appBars[_currentIndex]==null?null:AppBar(title: _appBars[_currentIndex]),//_appBars[_currentIndex],
       body: _children[_currentIndex], // new
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

@@ -17,7 +17,7 @@ class EditFoodItem extends StatefulWidget {
   EditFoodItem({@required this.reference});
 
   @override
-  _EditFoodItemState createState() => _EditFoodItemState();
+  _EditFoodItemState createState() => _EditFoodItemState(this.reference);
 }
 
 class _EditFoodItemState extends State<EditFoodItem> {
@@ -26,53 +26,59 @@ class _EditFoodItemState extends State<EditFoodItem> {
   List<Image> images = List();
   Map<String, File> addedImages = Map(); // Stores where they were added
   List<String> removedImages = List();
-  bool hasLoaded = false;
+
 
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController priceController = TextEditingController();
 
   List<Option> orderOptions = List();
+  List<DocumentReference> deletedOrderOptionsRefs = List();
+
+  // TODO: Test this constructor
+  _EditFoodItemState(DocumentReference reference){
+    if(reference!=null){
+      reference.get().then((onValue){
+        FoodItem foodItem = FoodItem.fromSnapshot(onValue);
+        setState(() {
+          editableItem = foodItem;
+
+          nameController.text = editableItem.name;
+          descriptionController.text = editableItem.description;
+          priceController.text = editableItem.price.toStringAsFixed(2);
+        });
+        foodItem.images.forEach((ref){
+          FirebaseStorage.instance.ref().child("foodpics").child(
+              "$ref.png")
+              .getDownloadURL()
+              .then((imageUrl) {
+            Image image = Image.network(imageUrl.toString());
+            int index = foodItem.images.indexOf(ref);
+            setState(() {
+              if(index > images.length)
+                images.add(image);
+              else
+                images.insert(index, image);
+            });
+          });
+        });
+        reference.collection('options').getDocuments().then((optionsSnapshots){
+          optionsSnapshots.documents.forEach((snapshot){
+            orderOptions.add(Option.fromSnapshot(snapshot));
+          });
+        });
+      });
+
+
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
-    if(widget.reference!=null){
-      widget.reference.get().then((onValue){
-        if(!hasLoaded) {
-          FoodItem foodItem = FoodItem.fromSnapshot(onValue);
-          setState(() {
-            editableItem = foodItem;
-          });
-          foodItem.images.forEach((ref){
-            FirebaseStorage.instance.ref().child("foodpics").child(
-                "$ref.png")
-                .getDownloadURL()
-                .then((imageUrl) {
-              Image image = Image.network(imageUrl.toString());
-              int index = foodItem.images.indexOf(ref);
-              setState(() {
-                if(index > images.length)
-                  images.add(image);
-                else
-                  images.insert(index, image);
-              });
-            });
-          });
-          widget.reference.collection('options').getDocuments().then((optionsSnapshots){
-            optionsSnapshots.documents.forEach((snapshot){
-              orderOptions.add(Option.fromSnapshot(snapshot));
-            });
-          });
-          hasLoaded = true;
-        }
-      });
-    }
-
-    nameController.text = editableItem.name;
-    descriptionController.text = editableItem.description;
-    priceController.text = editableItem.price.toStringAsFixed(2);
-
-    return Container(
+    return Scaffold(
+      appBar: AppBar(title: Text(editableItem.name),),
+      body: Container(
         child: Padding(
           padding: const EdgeInsets.symmetric(
             vertical: 8.0,
@@ -126,7 +132,8 @@ class _EditFoodItemState extends State<EditFoodItem> {
             ],
           ),
         ),
-      );
+      ),
+    );
   }
 
 //  Future _showCurrentOrders() async {
@@ -642,15 +649,6 @@ class _EditFoodItemState extends State<EditFoodItem> {
           '$name.png').putFile(file);
     });
 
-    //FirebaseStorage.instance.ref().child('foodpics').child(
-    //            '${editableItem.reference.documentID}-$i.png').putFile(imageFile);
-
-//    for(int i = editableItem.numImages; i < 6; i++){
-//      FirebaseStorage.instance.ref().child('foodpics').child(
-//          '${editableItem.reference.documentID}-$i.png').delete();
-//
-//    }
-
     orderOptions.forEach((option) {
       if (option.reference != null) {
         option.updateOption();
@@ -658,6 +656,10 @@ class _EditFoodItemState extends State<EditFoodItem> {
       else{
         option.createOption(editableItem.reference.collection('options'));
       }
+    });
+
+    deletedOrderOptionsRefs.forEach((ref){
+      ref.delete();
     });
 
     //TODO: Delete Comment
@@ -716,6 +718,8 @@ class _EditFoodItemState extends State<EditFoodItem> {
               child: Text('Yes'),
               onPressed: () {
                 setState(() {
+                  if(option.reference != null)
+                    deletedOrderOptionsRefs.add(option.reference);
                   option.deleteOption();
                   orderOptions.remove(option);
                 });

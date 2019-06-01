@@ -6,6 +6,9 @@ import 'package:cookt/widgets/orders/Orders.dart';
 import 'package:cookt/widgets/profile/Profile.dart';
 
 import 'package:cookt/widgets/sell/SaleHome.dart';
+import 'package:cookt/widgets/browse/FoodItemView.dart';
+import 'package:cookt/widgets/sell/EditFoodItem.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cookt/models/DatabaseIntegrator.dart';
 
@@ -14,7 +17,6 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
 
     return MaterialApp(
       title: "Cookt",
@@ -52,14 +54,14 @@ class _HomeState extends State<Home> {
     _specializedIndices['CurrentSearch'] = 0;
 
     _appBars = [
-      Text('Home'),
+      null, //Text('Home'),
       null,
       null,
       Text('Profile')
     ];
 
     _children = [
-      PlaceholderWidget(Colors.red),
+      FoodItemView(reference: Firestore.instance.collection('fooddata').document('1yzdDBacqdeRxewvuczy'),),
       Search(),
       Orders(),
       Profile()
@@ -102,13 +104,18 @@ class _HomeState extends State<Home> {
     });
   }
 
-  // MARK: Home Controller Methods
-
-  // MARK: Search Controller Methods
-
-  // MARK: Order Controller Methods
-
-  // MARK: Profile Controller Methods
+  // TODO: Delete Function (Or Keep if expected Scripting in future)
+  void scriptRunner(){
+//    Container(
+//      child: Center(
+//        child: RaisedButton(
+//          onPressed: scriptRunner,
+//          child: Text('Run Script'),
+//        ),
+//      ),
+//    ),
+    print('hello wrld');
+  }
 }
 
 
