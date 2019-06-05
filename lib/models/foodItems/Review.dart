@@ -10,7 +10,7 @@ class Review {
   final String userid;
   final DateTime time;
 
-  final DocumentReference reference;
+  DocumentReference reference;
 
   Review.fromMap(Map<String, dynamic> map, {@required this.reference}) :
         assert(map['rating'] != null),
@@ -25,17 +25,27 @@ class Review {
   Review.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
 
+  Review.from(int rating, String review) :
+        this.rating = rating,
+        this.review = review,
+        this.userid = 'usercustomer',
+        this.time = DateTime.now(),
+        this.reference = null;
+
   @override
   String toString() => "$userid : $rating";
 
-  static void createReview(String review, int rating, FoodItem foodItem) {
+  Future<DocumentReference> create(DocumentReference reference) async {
     Map<String, dynamic> map = Map();
     map['rating'] = rating;
     map['review'] = review;
-    map['userid'] = 'usercustomer';
-    map['time'] = DateTime.now();
+    map['userid'] = userid;
+    map['time'] = time;
 
-    foodItem.reference.collection('reviews').add(map);
+    reference.collection('reviews').add(map).then((ref){
+      this.reference = ref;
+      return ref;
+    });
   }
 
   void updateReview(String review, int rating) {

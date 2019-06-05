@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cookt/models/orders/Item.dart';
+import 'package:cookt/models/orders/Selection.dart';
 
 class Order {
   String cookID;
@@ -24,7 +25,7 @@ class Order {
                // If status == 'FINISHED' then its finished otherwise
                // its cancelled
 
-  final DocumentReference reference;
+  DocumentReference reference;
 
   Order.newOrder(String cookID)
       :
@@ -86,7 +87,7 @@ class Order {
   @override
   String toString() => "$cookID $customerID ${reference.documentID} $orderTime $status $lastTouchedID $active Order";
 
-  void createListing() {
+  Future<DocumentReference> create({Item item, List<Selection> selections}) async {
     Map<String, dynamic> map = Map();
     map['cookID'] = cookID;
     map['customerID'] = customerID;
@@ -105,7 +106,15 @@ class Order {
     map['taxZip'] = taxZip;
     map['active'] = active;
 
-    Firestore.instance.collection('orders').add(map);
+    Firestore.instance.collection('orders').add(map).then((ref){
+      this.reference = ref;
+
+      if(item != null){
+        item.create(ref, selections: selections);
+      }
+
+      return ref;
+    });
   }
 
   void acceptFinishOrder(){
@@ -146,7 +155,16 @@ class Order {
   // TODO: Remove Comment
   void deleteOrder(){
     print('Deleting Order from Database');
-    //reference.delete();
+    reference.delete();
+  }
+
+  // TODO: Implemenet items() call instead of .collection('items')
+  List<Item> items(){
+
+  }
+
+  void addItem(Item item, List<Selection> selections){
+    item.create(reference, selections: selections);
   }
 
   void reorder() async {

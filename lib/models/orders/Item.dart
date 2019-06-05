@@ -8,9 +8,9 @@ import 'package:cookt/models/orders/Selection.dart';
 
 class Item {
   final String foodID;
-  bool prepared;
+  bool prepared; // TODO: Implement prepared
   double price;
-  int quantity;
+  int quantity; // TODO: Implement Quantity on OrderTiles in Home and in FoodItemView
 
   DocumentReference reference;
 
@@ -27,7 +27,7 @@ class Item {
   Item.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
 
-  Item.fromData(String foodID, double price, int quantity, Order order) :
+  Item.from(String foodID, double price, int quantity) :
         this.foodID = foodID,
         this.prepared = false,
         this.price = price,
@@ -37,13 +37,35 @@ class Item {
   @override
   String toString() => "$foodID $quantity $price Item";
 
+  // TODO: Implemenet items() call instead of .collection('selections')
   List<Selection> selections() {
     reference.collection('selections').snapshots().single.then(((snapshot){
       return snapshot.documents.map((document) => Selection.fromSnapshot(document)).toList();
     }));
   }
 
-  void updateItem(String review, int rating) {
+  Future<DocumentReference> create(DocumentReference reference, {List<Selection> selections}) async {
+    Map<String, dynamic> map = Map();
+    map['foodID'] = foodID;
+    map['prepared'] = prepared;
+    map['price'] = price;
+    map['quantity'] = quantity;
+
+    reference.collection('items').add(map).then((ref){
+      this.reference = ref;
+
+      if(selections != null) {
+        selections.forEach((selection) {
+          if(selection.selections.length > 0)
+            selection.create(ref);
+        });
+      }
+
+      return ref;
+    });
+  }
+
+  void updateItem() {
     Map<String, dynamic> map = Map();
     map['foodID'] = foodID;
     map['prepared'] = prepared;

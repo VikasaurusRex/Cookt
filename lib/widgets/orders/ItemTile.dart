@@ -86,6 +86,7 @@ class _ItemTileState extends State<ItemTile> {
               Padding(
                 padding: EdgeInsets.fromLTRB(20.0, 0.0, 0, 0.0),
                 child:Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: selections.map((selection) => SelectionTile(selection)).toList(),
                 ),
               ),
@@ -107,16 +108,16 @@ class SelectionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text('${selection.title}:', style: Theme.of(context).textTheme.subtitle.apply(color: Colors.grey),),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: selection.selections.map((selection) => Text('$selection', style: Theme.of(context).textTheme.subtitle,)).toList(),
-            )
-          ],
-        )
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text('${selection.title}:', style: Theme.of(context).textTheme.subtitle.apply(fontSizeFactor: 1.05, fontWeightDelta: 2),),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: selection.selections.map((selection) => Text('$selection', style: Theme.of(context).textTheme.subtitle,)).toList(),
+          )
+        ],
+      )
     );
   }
 }

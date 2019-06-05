@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: "Cookt",
       home: Home(),
       theme: ThemeData(
-        //primarySwatch: Colors.red,
+//        primarySwatch: Colors.red,
         buttonTheme: ButtonThemeData(
           padding: EdgeInsets.all(0),
           layoutBehavior: ButtonBarLayoutBehavior.constrained,
@@ -114,6 +114,28 @@ class _HomeState extends State<Home> {
 //        ),
 //      ),
 //    ),
+
+    Firestore.instance.collection('orders').getDocuments().then((orderQuery){
+      orderQuery.documents.forEach((orderSnap){
+        orderSnap.reference.collection('items').getDocuments().then((itemQuery){
+          itemQuery.documents.forEach((itemSnap){
+            itemSnap.reference.collection('selections').getDocuments().then((selectionQuery){
+              selectionQuery.documents.forEach((selectionSnap){
+                if(selectionSnap.data['title'] == 'Base'){
+                  Map<String, dynamic> map = Map();
+                  map['prices'] = [0];
+                  selectionSnap.reference.updateData(map);
+                }else{
+                  Map<String, dynamic> map = Map();
+                  map['prices'] = [0.5, 0.35];
+                  selectionSnap.reference.updateData(map);
+                }
+              });
+            });
+          });
+        });
+      });
+    });
     print('hello wrld');
   }
 }

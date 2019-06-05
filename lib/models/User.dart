@@ -41,7 +41,7 @@ class User {
   @override
   String toString() => "${reference.documentID} $firstname $lastname";
 
-  void createUser(String uid) {
+  void create(String uid) {
     Map<String, dynamic> map = Map();
     map['firstname'] = firstname;
     map['lastname'] = lastname;
@@ -52,6 +52,7 @@ class User {
     map['long'] = long;
 
     Firestore.instance.collection('users').document(uid).updateData(map);
+    this.reference = Firestore.instance.collection('users').document(uid);
   }
 
   bool operator ==(other) {

@@ -632,7 +632,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
     }
 
     if(editableItem.reference == null) {
-      Future<DocumentReference> ref = editableItem.createListing();
+      Future<DocumentReference> ref = editableItem.create();
       editableItem.reference = await ref;
     } else {
       print('Updating with a change');
@@ -654,7 +654,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
         option.updateOption();
       }
       else{
-        option.createOption(editableItem.reference.collection('options'));
+        option.create(editableItem.reference);
       }
     });
 

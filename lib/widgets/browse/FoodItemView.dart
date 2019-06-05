@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,6 +12,8 @@ import 'package:cookt/models/foodItems/Option.dart';
 import 'package:cookt/models/foodItems/Review.dart';
 
 import 'package:cookt/models/orders/Selection.dart';
+import 'package:cookt/models/orders/Order.dart';
+import 'package:cookt/models/orders/Item.dart';
 
 import 'package:cookt/models/DatabaseIntegrator.dart';
 
@@ -27,6 +30,14 @@ class FoodItemView extends StatefulWidget {
 
 class _FoodItemViewState extends State<FoodItemView> {
 
+  // TODO: Remove all direct data requests from the view classes
+  // TODO:  Find all view classes and delete firebase imports
+  // TODO:  Go to all model classes and add helper methods that
+  // TODO:    interface with the database to do what the orignal code was doing.
+
+  // TODO: Index all first and last names to their UID
+  // Firebase: Access at 'vikram' and get a list of UID's to query food items with
+
   bool hasOrdered = false;
 
   ScrollController scroller = ScrollController();
@@ -39,7 +50,8 @@ class _FoodItemViewState extends State<FoodItemView> {
   List<Option> orderOptions = [];
   List<Selection> itemSelections = [];
 
-  double price = 0.0; // TODO: Calculate price based on selections...
+  double price = 0.0;
+  int quantity = 1; // TODO: Implement Quantity
 
   TextEditingController reviewController = TextEditingController();
   int myRating = 0;
@@ -50,10 +62,6 @@ class _FoodItemViewState extends State<FoodItemView> {
   LatLng cookCoords = null;
 
   _FoodItemViewState(DocumentReference reference){
-    //orderOptions = [Option.newOption(), Option.newOption(), Option.newOption()];
-
-    // TODo: Move Block From Here
-    //itemSelections = orderOptions.map((option) => Selection.from(option.title, [])).toList();
 
     scroller = ScrollController();
     scroller.addListener(scrolled);
@@ -73,6 +81,8 @@ class _FoodItemViewState extends State<FoodItemView> {
           loadReviews(reference);
           checkIfOrdered();
           loadLocation();
+
+          price = foodItem.price;
 
           images = foodItem.images.map((img) => Container(
             color: Colors.grey,
@@ -105,7 +115,6 @@ class _FoodItemViewState extends State<FoodItemView> {
             optionsSnapshots.documents.forEach((snapshot){
               orderOptions.add(Option.fromSnapshot(snapshot));
             });
-            // TODO: Move Mapping of Selections to Here
             itemSelections = orderOptions.map((option) => Selection.from(option.title)).toList();
           });
       });
@@ -159,9 +168,41 @@ class _FoodItemViewState extends State<FoodItemView> {
             Padding(padding: EdgeInsets.all(50.0),),
           ],
         ),
-//      floatingActionButton: _orderButton(),
-//      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+//
       ),
+      floatingActionButton: Stack(
+          alignment: Alignment.centerRight,
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColorLight.withAlpha(150),
+                border: Border.all(color: Theme.of(context).primaryColor),
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              width: 175,
+              child: InkWell(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onTap: orderItem,
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('\$${price<=0? '\$\$.\$\$': price.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subtitle.apply(fontSizeFactor: 2),),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.0),
+              child: FloatingActionButton(
+                elevation: 10,
+                onPressed: orderItem,
+                foregroundColor: Theme.of(context).primaryColorLight,
+                backgroundColor: Theme.of(context).primaryColor,
+                child: Icon(Icons.shopping_cart),
+              ),
+            ),
+          ],
+        ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -330,7 +371,8 @@ class _FoodItemViewState extends State<FoodItemView> {
         return;
       }
     }
-    Review.createReview(reviewController.text, myRating, foodItem);
+    Review review = Review.from(myRating, reviewController.text);
+    review.create(foodItem.reference);
     showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -357,11 +399,39 @@ class _FoodItemViewState extends State<FoodItemView> {
     );
   }
 
-  void orderItem(){
-    // TODO: Check whether order exists
-    // TODO: Add to Existing Order or Create new Order and add the Item
-    // TODO: Add all Selections to the Item. If the selections is [], add 'NONE'
-    // TODO: Add the Price of additions to the ItemPrice
+  void orderItem() async{
+    // Check whether order exists
+    // Add to Existing Order or Create new Order and add the Item
+    // Add all Selections to the Item. If the selections is [], add 'NONE'
+    // Add the Price of additions to the ItemPrice
+
+    // Check if online (May fail if google.com is down)
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        Firestore.instance.collection('orders')
+            .where('cookID', isEqualTo: foodItem.uid)
+            .where('customerID', isEqualTo: 'usercustomer', )
+            .where('status', isEqualTo: 'PENDING')
+            .where('active', isEqualTo: true).getDocuments().then((querySnapshot){
+              if(querySnapshot != null && querySnapshot.documents != null && querySnapshot.documents.length > 0) {
+                // Found Order
+
+                Order order = Order.fromSnapshot(querySnapshot.documents.first);
+                Item item = Item.from(foodItem.reference.documentID, price, quantity);
+                order.addItem(item, itemSelections);
+              }else{
+                //Create Order
+                Order order = Order.newOrder(foodItem.uid);
+                Item item = Item.from(foodItem.reference.documentID, price, quantity);
+                order.create(item: item, selections: itemSelections);
+              }
+
+        });
+      }
+    } on SocketException catch (_) {
+      print('Not Connected');
+    }
   }
 
   Widget _imagesScroll() {
@@ -489,9 +559,9 @@ class _FoodItemViewState extends State<FoodItemView> {
   }
 
   Widget _optionSelect(){
-    //Display OrderOptions
-    //Add selection to itemSelections
-    //TODO: Update price upon selection
+    // Display OrderOptions
+    // Add selection to itemSelections
+    // Update price upon selection
 
     return Container(
       child: Column(
@@ -527,16 +597,17 @@ class _FoodItemViewState extends State<FoodItemView> {
                   if(index >= 0)
                     setState(() {
                       selection.selections.removeAt(index);
-                      selection.prices.removeAt(index);
+                      price -= selection.prices.removeAt(index);
                     });
                   else if(selection.selections.length < option.maxSelection)
                     setState(() {
                       selection.selections.add(optionName);
                       selection.prices.add(option.price[option.options.indexOf(optionName)]);
+                      price += option.price[option.options.indexOf(optionName)];
                     });
                   print(selection);
                 },
-                child: Text('$optionName - \$${option.price[option.options.indexOf(optionName)].toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead.apply(color: itemSelections[orderOptions.indexOf(option)].selections.contains(optionName)? Colors.green: Colors.black),),
+                child: Text('$optionName ${option.price[option.options.indexOf(optionName)]<=0? '': '(+\$${option.price[option.options.indexOf(optionName)].toStringAsFixed(2)})'}', style: Theme.of(context).textTheme.subhead.apply(color: itemSelections[orderOptions.indexOf(option)].selections.contains(optionName)? Colors.green: Colors.black),),
               )).toList(),
             ),
           ],

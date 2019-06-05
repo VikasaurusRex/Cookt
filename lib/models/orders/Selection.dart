@@ -16,7 +16,7 @@ class Selection {
         assert(map['prices'] != null),
         this.title = map['title'],
         this.selections = List<String>.from(map['selections']),
-        this.prices = List<double>.from(map['prices']);
+        this.prices = List<double>.from(List<dynamic>.from(map['prices']).map((dbl) => dbl.toDouble()).toList());
 
   Selection.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
@@ -29,13 +29,17 @@ class Selection {
   @override
   String toString() => "$title $selections $prices\n";
 
-  void createSelection() {
+
+  Future<DocumentReference> create(DocumentReference reference, {List<Selection> Selections}) async {
     Map<String, dynamic> map = Map();
     map['title'] = title;
     map['selections'] = selections;
     map['prices'] = prices;
 
-    reference.updateData(map);
+    reference.collection('selections').add(map).then((ref){
+      this.reference = ref;
+      return ref;
+    });
   }
 
   void reorder(DocumentReference ref) async {

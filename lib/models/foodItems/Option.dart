@@ -11,7 +11,7 @@ class Option {
   List<double> price;
   String title;
 
-  final DocumentReference reference;
+  DocumentReference reference;
 
   Option.fromMap(Map<String, dynamic> map, {@required this.reference}) :
         assert(map['maxSelection'] != null),
@@ -36,14 +36,17 @@ class Option {
   @override
   String toString() => "$title : $options";
 
-  void createOption(CollectionReference ref) {
+  Future<DocumentReference> create(DocumentReference reference) async {
     Map<String, dynamic> map = Map();
     map['maxSelection'] = maxSelection;
     map['options'] = options;
     map['price'] = price;
     map['title'] = title;
 
-    ref.add(map);
+    reference.collection('options').add(map).then((ref){
+      this.reference = ref;
+      return ref;
+    });
   }
 
   void updateOption() {

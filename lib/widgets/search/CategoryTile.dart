@@ -10,16 +10,17 @@ class CategoryTile extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(4),
+      padding: EdgeInsets.all(2.0),
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(10.0),
-          color: Theme.of(context).primaryColorDark.withAlpha(230),
+          border: Border.all(color: Theme.of(context).primaryColor),
+          borderRadius: BorderRadius.circular(2.0),
+          color: Theme.of(context).primaryColorLight,
         ),
         child: FlatButton(
           onPressed: onTileTapped,
-          child: Text(category, style: Theme.of(context).textTheme.subhead.apply(color: Colors.white),),
+          child: Text(category, style: Theme.of(context).textTheme
+              .subhead.apply(fontSizeDelta: 2, fontWeightDelta: 2, color: Theme.of(context).primaryColorDark),),
         ),
       ),
     );

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:cookt/properties.dart';
+import 'package:cookt/models/foodItems/Option.dart';
 
 class FoodItem {
 
@@ -83,7 +83,7 @@ class FoodItem {
   @override
   String toString() => "${reference.documentID}";
 
-  Future<DocumentReference> createListing() {
+  Future<DocumentReference> create({List<Option> options}) {
     Map<String, dynamic> map = Map();
     map['categories'] = categories;
     map['description'] = description;
@@ -96,7 +96,17 @@ class FoodItem {
     map['timeUpdated'] = timeUpdated;
     map['uid'] = uid;
 
-    return Firestore.instance.collection('fooddata').add(map);
+    Firestore.instance.collection('fooddata').add(map).then((ref){
+      this.reference = ref;
+
+      if(options != null) {
+        options.forEach((selection) {
+          selection.create(ref);
+        });
+      }
+
+      return ref;
+    });
   }
 
   void updateListingWithData(DocumentReference ref) {
