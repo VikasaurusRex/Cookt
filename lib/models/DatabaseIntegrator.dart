@@ -95,12 +95,12 @@ class DatabaseIntegrator{
     return '${snapshot.data['firstname']} ${snapshot.data['lastname']}';
   }
 
-  static Future<LatLng> loc(String uid) async {
+  static Future<GeoPoint> loc(String uid) async {
     DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(uid).get();
     if(!snapshot.exists || snapshot.data['kitchenname'] == null){
       return null;
     }
-    return LatLng(snapshot.data['lat'], snapshot.data['long']);
+    return snapshot.data['loc'];
   }
 
   static Future<String> kitchenName(String uid) async {
@@ -129,7 +129,6 @@ class DatabaseIntegrator{
 
   static Future<double> cooktTake() async{
     DataSnapshot snapshot = await FirebaseDatabase.instance.reference().child('properties').once();
-    print('In int ${snapshot.value['cookttake'].toDouble()}');
     if(snapshot.value['cookttake'] == null){
       return -1;
     }
@@ -199,28 +198,5 @@ class DatabaseIntegrator{
     }
   }
 
-//  Widget pickupTimeFromNow(BuildContext context){
-//    return StreamBuilder<String>(
-//      stream: Stream<String>.periodic(
-//        Duration(seconds: 1), (int numRepeats) {
-//          final remaining = pickupTime.difference(DateTime.now());
-//
-//          if(remaining.isNegative){
-//            return "ASAP";
-//          }
-//
-//          final hours = remaining.inHours - remaining.inDays * 24;
-//          final minutes = remaining.inMinutes - remaining.inHours * 60;
-//          final seconds = remaining.inSeconds - remaining.inMinutes * 60;
-//
-//          final formattedRemaining = 'In $hours hours, $minutes minutes';
-//          return formattedRemaining;
-//        }
-//      ).asBroadcastStream(),
-//    builder: (BuildContext context, AsyncSnapshot<String> text) => Text(
-//      "${text.data}",
-//      style: Theme.of(context).textTheme.subhead,
-//    ),
-//    );
-//  }
+
 }

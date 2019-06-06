@@ -75,7 +75,7 @@ class _IncomingOrderTileState extends State<IncomingOrderTile> {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 4.0),
               child: Column(
-                children: items.map((item) => ItemTile(item, null, key: Key(item.toString()),)).toList(),
+                children: items.map((item) => ItemTile(item, null, false, key: Key(item.toString()),)).toList(),
               ),
             ),
             Container(

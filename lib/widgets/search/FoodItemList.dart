@@ -24,10 +24,14 @@ class _FoodItemListState extends State<FoodItemList> {
     queries.forEach((query){
       query.snapshots().listen((querySnapshot){
         querySnapshot.documents.forEach((snapshot){
+          FoodItem item = FoodItem.fromSnapshot(snapshot);
           //print('  Found the snapshot ${snapshot.documentID}: ${snapshot.data}');
-          if(!items.contains(FoodItem.fromSnapshot(snapshot))){
+          if(!items.contains(item)){
             setState(() {
-              items.add(FoodItem.fromSnapshot(snapshot));
+              if(item.isHosting)
+                items.insert(0, item);
+              else
+                items.insert(items.length, item);
             });
           }
         });

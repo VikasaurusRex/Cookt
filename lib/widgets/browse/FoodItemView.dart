@@ -35,9 +35,6 @@ class _FoodItemViewState extends State<FoodItemView> {
   // TODO:  Go to all model classes and add helper methods that
   // TODO:    interface with the database to do what the orignal code was doing.
 
-  // TODO: Index all first and last names to their UID
-  // Firebase: Access at 'vikram' and get a list of UID's to query food items with
-
   bool hasOrdered = false;
 
   ScrollController scroller = ScrollController();
@@ -51,7 +48,7 @@ class _FoodItemViewState extends State<FoodItemView> {
   List<Selection> itemSelections = [];
 
   double price = 0.0;
-  int quantity = 1; // TODO: Implement Quantity
+  int quantity = 1;
 
   TextEditingController reviewController = TextEditingController();
   int myRating = 0;
@@ -160,6 +157,9 @@ class _FoodItemViewState extends State<FoodItemView> {
             Text('Order Options', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
             _optionSelect(),
             Padding(padding: EdgeInsets.all(8.0), child:
+            Text('Quantity', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
+            _quantityAdjustor(),
+            Padding(padding: EdgeInsets.all(8.0), child:
             Text('Rate/Review', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
             _rateAndReview(),
             Padding(padding: EdgeInsets.all(8.0), child:
@@ -244,7 +244,7 @@ class _FoodItemViewState extends State<FoodItemView> {
     } on Exception {}
 
     DatabaseIntegrator.loc(foodItem.uid).then((val) => setState(() {
-      cookCoords = val;
+      cookCoords = LatLng(val.latitude, val.longitude);
       updateMap();
     }));
   }
@@ -613,6 +613,36 @@ class _FoodItemViewState extends State<FoodItemView> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _quantityAdjustor(){
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        FlatButton(
+          child: Icon(Icons.remove),
+          onPressed: (){
+            if(quantity > 1)
+              setState(() {
+                quantity--;
+              });
+          },
+        ),
+        Text(
+          '$quantity ${foodItem.name}${quantity>1? 's':''}',
+          style: Theme.of(context).textTheme.subtitle.apply(fontWeightDelta: 1, fontSizeFactor: 1.2),
+        ),
+        FlatButton(
+          child: Icon(Icons.add),
+          onPressed: (){
+            setState(() {
+              quantity++;
+            });
+          },
+        ),
+
+      ],
     );
   }
 

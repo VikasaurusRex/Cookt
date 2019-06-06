@@ -8,8 +8,7 @@ class User {
   String kitchenname;
   bool dineInAvailable;
   final bool verified;
-  double lat;
-  double long;
+  GeoPoint loc;
 
   DocumentReference reference;
 
@@ -21,8 +20,7 @@ class User {
         this.lastname = map['lastname'],
         this.kitchenname = map['kitchenname'],
         this.verified = map['verified'],
-        this.lat = map['lat'],
-        this.long = map['long'];
+        this.loc = map['loc'];
 
   User.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
@@ -34,8 +32,7 @@ class User {
         this.kitchenname = null,
         this.dineInAvailable = null,
         this.verified = null,
-        this.lat = null,
-        this.long = null,
+        this.loc = null,
         this.reference = null;
 
   @override
@@ -48,8 +45,7 @@ class User {
     map['kitchenname'] = kitchenname;
     map['dineInAvailable'] = dineInAvailable;
     map['verified'] = verified;
-    map['lat'] = lat;
-    map['long'] = long;
+    map['loc'] = loc;
 
     Firestore.instance.collection('users').document(uid).updateData(map);
     this.reference = Firestore.instance.collection('users').document(uid);

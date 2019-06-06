@@ -6,10 +6,8 @@ import 'OrderList.dart';
 
 class Orders extends StatelessWidget {
 
-  final List<String> labels = ['Active', 'Pending', 'Past',];
+  final List<String> labels = ['Active', 'Past',];
   final List<Query> queries = [
-    // TODO: Remove Comment
-    Firestore.instance.collection('orders').where('status', isEqualTo: 'ACCEPTED').where('active', isEqualTo: true).where('customerID', isEqualTo: 'usercustomer'),
     Firestore.instance.collection('orders').where('active', isEqualTo: true).where('customerID', isEqualTo: 'usercustomer'),
     Firestore.instance.collection('orders').where('active', isEqualTo: false).where('customerID', isEqualTo: 'usercustomer'),
   ];

@@ -61,6 +61,7 @@ class _SearchState extends State<Search> {
                 onPressed: (){
                   setState(() {
                     isSearching = false;
+                    searchField.text = '';
                   });
                 },
                 child: Icon(Icons.cancel, size: 25,),
@@ -106,7 +107,7 @@ class _SearchState extends State<Search> {
 
   Widget _currentSearch(){
     List<Query> searchComponents = [
-      Firestore.instance.collection('fooddata').where('name', isEqualTo: searchField.text),
+      Firestore.instance.collection('fooddata').orderBy('name').startAt([searchField.text]).endAt([searchField.text.length <=0? '': searchField.text+'\uf8ff']),
       Firestore.instance.collection('fooddata').where('categories', arrayContains: searchField.text),
       Firestore.instance.collection('fooddata').where('price', isLessThanOrEqualTo: isNum(searchField.text)?double.parse(searchField.text):-0.1),
     ];

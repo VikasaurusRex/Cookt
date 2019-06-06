@@ -42,6 +42,7 @@ class _FoodItemTileState extends State<FoodItemTile> {
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey),
+          color: item.isHosting? Colors.white: Color(0xFFCBCBCB),
         ),
         child: Padding(
           padding: EdgeInsets.all(8.0),
@@ -54,7 +55,7 @@ class _FoodItemTileState extends State<FoodItemTile> {
               ),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(item.name, style: Theme.of(context).textTheme.title,),
+                child: Text('${item.name} ${item.isHosting? '':'(Not Available)'}', style: Theme.of(context).textTheme.title,),
               ),
               InfoTiles(labels, key: Key(labels.toString()),),
               Container(
@@ -63,7 +64,7 @@ class _FoodItemTileState extends State<FoodItemTile> {
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(0, 4.0, 0, 0),
-                child: Text('Served by ${_cookName}', style: Theme.of(context).textTheme.subtitle.apply(color: Colors.grey),),
+                child: Text('Served by ${_cookName}', style: Theme.of(context).textTheme.subtitle.apply(color: item.isHosting? Colors.grey: Colors.black),),
               )
             ],
           ),

@@ -102,7 +102,7 @@ class _OrderTileState extends State<OrderTile> {
     } on Exception {}
     Firestore.instance.collection('users').document(order.cookID).get().then((snapshot){
       User cook = User.fromSnapshot(snapshot);
-      cookCoords = LatLng(cook.lat, cook.long);
+      cookCoords = LatLng(cook.loc.latitude, cook.loc.longitude);
       updateDelivery();
     });
   }
@@ -253,7 +253,7 @@ class _OrderTileState extends State<OrderTile> {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 4.0),
               child: Column(
-                children: items.map((item) => ItemTile(item, deleteItem, key: Key(item.toString()),)).toList(),
+                children: items.map((item) => ItemTile(item, deleteItem, order.status == Status.pending && order.active == true, key: Key(item.toString()), calculatePrice: calculatePrice,)).toList(),
               ),
             ),
             Container(

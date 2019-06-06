@@ -35,7 +35,7 @@ class Item {
         this.reference = null;
 
   @override
-  String toString() => "$foodID $quantity $price Item";
+  String toString() => "$foodID $price Item";
 
   // TODO: Implemenet items() call instead of .collection('selections')
   List<Selection> selections() {
@@ -84,10 +84,10 @@ class Item {
     reference.updateData(data);
   }
 
-  void decrementQuantity(BuildContext context){
+  void decrementQuantity(){
     Map<String, dynamic> data  = Map();
     if(quantity <= 1){
-      //reference.delete();
+      reference.delete();
       print('Deleting Item');
       return;
     }
@@ -107,7 +107,7 @@ class Item {
 
   void deleteItem(){
     print('Deleting Item');
-    //reference.delete();
+    reference.delete();
   }
   
   void reorder(DocumentReference ref) async {

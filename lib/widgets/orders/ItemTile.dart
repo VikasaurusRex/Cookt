@@ -8,10 +8,12 @@ import 'package:cookt/models/orders/Selection.dart';
 class ItemTile extends StatefulWidget {
   final Item item;
   final Function(Item) deleteItem;
+  final Function calculatePrice;
+  final bool allowModification;
 
   Key key;
 
-  ItemTile(this.item, this.deleteItem, {@required this.key});
+  ItemTile(this.item, this.deleteItem, this.allowModification, {@required this.key, this.calculatePrice});
 
   @override
   State<StatefulWidget> createState() =>_ItemTileState(item);
@@ -61,33 +63,77 @@ class _ItemTileState extends State<ItemTile> {
             children: <Widget>[
               Row(
                 children: <Widget>[
-//                  Container(
-////                    decoration: BoxDecoration(
-////                      border: Border.all(color: Colors.grey),
-////                      borderRadius: BorderRadius.circular(5.0),
-////                    ),
-//                    child: Padding(
-//                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-//                      child: Text('${item.quantity.toString()}x', style: Theme.of(context).textTheme.subhead,),
-//                    ),
-//                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    child: Row(
+                        children: <Widget>[
+                          widget.allowModification ?InkWell(
+                            child: Icon(Icons.remove),
+                            onTap: () {
+                              setState(() {
+                                if (item.quantity == 1) {
+                                  _confirmDelete();
+                                  return;
+                                }
+                                item.decrementQuantity();
+                                widget.calculatePrice();
+                              });
+                            },
+                          ) : Container(),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text('${item.quantity.toString()}', style: Theme
+                                .of(context)
+                                .textTheme
+                                .subhead,),
+                          ),
+                          widget.allowModification? InkWell(
+                            child: Icon(Icons.add),
+                            onTap: () {
+                              setState(() {
+                                item.incrementQuantity();
+                                widget.calculatePrice();
+                              });
+                            },
+                          ) : Container(),
+                        ]
+                    ),
+                  ),
                   Expanded(
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('${_itemName}  ${item.quantity>1?'(${item.quantity}x @ ${(item.price).toStringAsFixed(2)})':''}', style: Theme.of(context).textTheme.title,),
+                      child: Text('${_itemName}${item.quantity>1?'s':''}', style: Theme
+                          .of(context)
+                          .textTheme
+                          .title,),
+                      //${item.quantity>1?'(${item.quantity}x @ ${(item.price).toStringAsFixed(2)})':''}
                     ),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('\$${(item.price*item.quantity.toDouble()).toStringAsFixed(2)}', style: Theme.of(context).textTheme.title,),
+                    child: Text('\$${(item.price * item.quantity.toDouble())
+                        .toStringAsFixed(2)}', style: Theme
+                        .of(context)
+                        .textTheme
+                        .title,),
                   ),
+                  widget.allowModification ? InkWell(
+                    child: Icon(Icons.delete),
+                    onTap: () {
+                      _confirmDelete();
+                    }, //widget.deleteItem(item),
+                  ) : Container(),
                 ],
               ),
               Padding(
                 padding: EdgeInsets.fromLTRB(20.0, 0.0, 0, 0.0),
-                child:Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: selections.map((selection) => SelectionTile(selection)).toList(),
+                  children: selections.map((selection) =>
+                      SelectionTile(selection)).toList(),
                 ),
               ),
             ],
@@ -96,6 +142,46 @@ class _ItemTileState extends State<ItemTile> {
       ),
     );
   }
+
+  Future<void> _confirmDelete() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Are you sure?'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to delete the item?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                widget.deleteItem(item);
+                item.decrementQuantity();
+                item.deleteItem();
+                widget.calculatePrice();
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Cancel'),
+              onPressed: (){
+                // set to false
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
 }
 
 // TODO: Delete Items if a user doesnt want it anymore rather than deleting whole order.
