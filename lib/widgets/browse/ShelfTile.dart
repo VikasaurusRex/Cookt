@@ -6,26 +6,25 @@ import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'package:cookt/models/User.dart';
 import 'package:cookt/widgets/browse/FoodItemView.dart';
 import 'package:cookt/models/DatabaseIntegrator.dart';
-import 'InfoTiles.dart';
 
-class FoodItemTile extends StatefulWidget {
+class ShelfTile extends StatefulWidget {
   final FoodItem item;
   final User user;
 
   Key key;
 
-  FoodItemTile(this.item, this.user, {@required this.key});
+  ShelfTile(this.item, this.user, {@required this.key});
 
   @override
-  State<StatefulWidget> createState() =>_FoodItemTileState(item, user);
+  State<StatefulWidget> createState() =>_ShelfTileState(item, user);
 }
 
-class _FoodItemTileState extends State<FoodItemTile>{
+class _ShelfTileState extends State<ShelfTile>{
   final FoodItem item;
   User user;
   List<String> labels;
 
-  _FoodItemTileState(this.item, this.user){
+  _ShelfTileState(this.item, this.user){
     if(user == null){
       user = User.newUser('', '');
       Firestore.instance.collection('users').document(item.uid).get().then((snap){
@@ -36,7 +35,7 @@ class _FoodItemTileState extends State<FoodItemTile>{
     }
     labels =List<String>.from(item.categories);
     labels.insert(0, '\$${item.price.toStringAsFixed(2)}');
-  }
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +67,7 @@ class _FoodItemTileState extends State<FoodItemTile>{
                   alignment: AlignmentDirectional.topEnd,
                   children: <Widget>[
                     AspectRatio(
-                      aspectRatio: 1,
+                      aspectRatio: 3,
                       child: DatabaseIntegrator.foodImage(item.images[0]),
                     ),
                     Padding(
@@ -91,9 +90,8 @@ class _FoodItemTileState extends State<FoodItemTile>{
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text('${item.name} ${item.isHosting? '':'(Not Available)'}', style: Theme.of(context).textTheme.title,),
+                  child: Text('${item.name} - \$${item.price.toStringAsFixed(2)} ${item.isHosting? '':'(Not Available)'}', style: Theme.of(context).textTheme.title,),
                 ),
-                InfoTiles(labels, key: Key(labels.toString()),),
                 Container(
                   height: 1,
                   color: Colors.grey,

@@ -61,7 +61,7 @@ class _HomeState extends State<Home> {
     ];
 
     _children = [
-      FoodItemView(reference: Firestore.instance.collection('fooddata').document('1yzdDBacqdeRxewvuczy'),),
+      Browse(),//FoodItemView(reference: Firestore.instance.collection('fooddata').document('1yzdDBacqdeRxewvuczy'),),
       Search(),
       Orders(),
       Profile()

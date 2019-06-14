@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cookt/models/DatabaseIntegrator.dart';
 
-import 'package:cookt/models/orders/Order.dart';
-import 'package:cookt/models/foodItems/FoodItem.dart';
+import 'package:cookt/widgets/sell/SaleHome.dart';
 
 class Profile extends StatefulWidget {
 
@@ -44,7 +43,7 @@ class _ProfileState extends State<Profile> {
                   width: 100,
                   height: 100,
                   child: ClipRRect(
-                    borderRadius: new BorderRadius.circular(MediaQuery.of(context).size.height),
+                    borderRadius: new BorderRadius.circular(10),
                     child: DatabaseIntegrator.userImage('usercook'),
                   ),
                 ),
@@ -59,13 +58,49 @@ class _ProfileState extends State<Profile> {
             child: Text(_name, style: Theme.of(context).textTheme.title, textAlign: TextAlign.center,),
           ),
           Container(height: 1, color: Colors.grey,),
-          ProfileButton(Icons.favorite_border, 'Favorites'),
-          ProfileButton(Icons.credit_card, 'Payment'),
-          ProfileButton(Icons.person, 'Help'),
-          ProfileButton(Icons.settings, 'Settings'),
-          ProfileButton(Icons.location_on, 'Address'),
-          ProfileButton(Icons.attach_money, 'Sell Your Food'),
-          ProfileButton(Icons.person_outline, 'Log Out'),
+          ProfileButton(
+            icon: Icons.favorite_border,
+            label: 'Favorites',
+            onTap: null,
+          ),
+          ProfileButton(
+            icon: Icons.credit_card,
+            label: 'Payment',
+            onTap: null,
+          ),
+          ProfileButton(
+            icon: Icons.person,
+            label: 'Help',
+            onTap: null,
+          ),
+          ProfileButton(
+            icon: Icons.settings,
+            label: 'Settings',
+            onTap: null,
+          ),
+          ProfileButton(
+            icon: Icons.location_on,
+            label: 'Address',
+            onTap: null,
+          ),
+          ProfileButton(
+            icon: Icons.attach_money,
+            label: 'Sell Your Food',
+            onTap: (){
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return SaleHome();
+                  },
+                ),
+              );
+            },
+          ),
+          ProfileButton(
+            icon: Icons.person_outline,
+            label: 'Log Out',
+            onTap: null,
+          ),
           Expanded(child: Container(),)
         ],
       ),
@@ -76,8 +111,9 @@ class _ProfileState extends State<Profile> {
 class ProfileButton extends StatelessWidget{
   IconData icon;
   String label;
+  VoidCallback onTap;
 
-  ProfileButton(this.icon, this.label);
+  ProfileButton({this.icon, this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -86,9 +122,7 @@ class ProfileButton extends StatelessWidget{
       child: Container(
         height: 45,
         child: FlatButton(
-          onPressed: (){
-            print(label);
-          },
+          onPressed: onTap,
           child: Row(
             children: <Widget>[
               Padding(

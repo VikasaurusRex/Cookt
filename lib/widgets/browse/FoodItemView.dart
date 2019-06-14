@@ -33,7 +33,7 @@ class _FoodItemViewState extends State<FoodItemView> {
   // TODO: Remove all direct data requests from the view classes
   // TODO:  Find all view classes and delete firebase imports
   // TODO:  Go to all model classes and add helper methods that
-  // TODO:    interface with the database to do what the orignal code was doing.
+  // TODO:    interface with the database to do what the original code was doing.
 
   bool hasOrdered = false;
 
@@ -207,25 +207,17 @@ class _FoodItemViewState extends State<FoodItemView> {
   }
 
   void checkIfOrdered() async {
-    await for (QuerySnapshot snapshots in Firestore.instance
-        .collection("orders")
-        .where('customerID', isEqualTo: 'usercustomer')
-        .where('cookID', isEqualTo: '${foodItem.uid}')
-        .where('active', isEqualTo: false)
-        .snapshots().asBroadcastStream()) {
-      for (DocumentSnapshot snapshot in snapshots.documents) {
-        await for (QuerySnapshot itemSnaps in snapshot
-            .reference.collection('items')
-            .where('foodID', isEqualTo: foodItem.reference.documentID)
-            .snapshots().asBroadcastStream()){
-          for (DocumentSnapshot itemSnap in itemSnaps.documents) {
+    Firestore.instance.collection("orders").where('customerID', isEqualTo: 'usercustomer').where('cookID', isEqualTo: '${foodItem.uid}').where('active', isEqualTo: false).getDocuments().then((snapshots) {
+      snapshots.documents.forEach((snapshot) {
+        snapshot.reference.collection('items').where('foodID', isEqualTo: foodItem.reference.documentID).getDocuments().then((itemSnaps){
+          itemSnaps.documents.forEach((snap) {
             setState(() {
               hasOrdered = true;
             });
-          }
-        }
-      }
-    }
+          });
+        });
+      });
+    });
   }
 
   void scrolled(){
@@ -406,32 +398,60 @@ class _FoodItemViewState extends State<FoodItemView> {
     // Add the Price of additions to the ItemPrice
 
     // Check if online (May fail if google.com is down)
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+    foodItem.reference.get().then((snap){
+      FoodItem tempItem = FoodItem.fromSnapshot(snap);
+      if(tempItem.isHosting) {
         Firestore.instance.collection('orders')
             .where('cookID', isEqualTo: foodItem.uid)
             .where('customerID', isEqualTo: 'usercustomer', )
             .where('status', isEqualTo: 'PENDING')
             .where('active', isEqualTo: true).getDocuments().then((querySnapshot){
-              if(querySnapshot != null && querySnapshot.documents != null && querySnapshot.documents.length > 0) {
-                // Found Order
-
-                Order order = Order.fromSnapshot(querySnapshot.documents.first);
-                Item item = Item.from(foodItem.reference.documentID, price, quantity);
-                order.addItem(item, itemSelections);
-              }else{
-                //Create Order
-                Order order = Order.newOrder(foodItem.uid);
-                Item item = Item.from(foodItem.reference.documentID, price, quantity);
-                order.create(item: item, selections: itemSelections);
-              }
+          if(querySnapshot != null && querySnapshot.documents != null && querySnapshot.documents.length > 0) {
+            // Found Order
+            Order order = Order.fromSnapshot(querySnapshot.documents.first);
+            Item item = Item.from(foodItem.reference.documentID, price, quantity);
+            order.addItem(item, itemSelections);
+            Navigator.of(context).pop();
+          }else{
+            //Create Order
+            Order order = Order.newOrder(foodItem.uid);
+            Item item = Item.from(foodItem.reference.documentID, price, quantity);
+            order.create(item: item, selections: itemSelections);
+            Navigator.of(context).pop();
+          }
 
         });
+      }else{
+        _notAvailable();
       }
-    } on SocketException catch (_) {
-      print('Not Connected');
-    }
+    });
+  }
+
+  Future<void> _notAvailable() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Item Not Available'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('This food item is not available. Please check back later.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _imagesScroll() {
@@ -452,7 +472,7 @@ class _FoodItemViewState extends State<FoodItemView> {
         return Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5.0),
+            borderRadius: BorderRadius.circular(0.0),
           ),
           child: Padding(
             padding: EdgeInsets.all(8.0),
@@ -577,7 +597,7 @@ class _FoodItemViewState extends State<FoodItemView> {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(5.0),
+        borderRadius: BorderRadius.circular(0.0),
       ),
       child: Padding(
         padding: EdgeInsets.all(4.0),

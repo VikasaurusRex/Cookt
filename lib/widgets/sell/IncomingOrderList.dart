@@ -85,7 +85,7 @@ class _IncomingOrderListState extends State<IncomingOrderList>  with AutomaticKe
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Are you sure you want to accept the order?'),
+                Text('Are you sure you want to ${order.status == Status.accepted?'FINISH': 'accept'} the order?'),
               ],
             ),
           ),

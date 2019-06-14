@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:cookt/models/foodItems/FoodItem.dart';
+import 'package:cookt/models/foodItems/FoodItemList.dart';
 import 'CategoryTile.dart';
-import 'FoodItemList.dart';
+import 'FoodItemListView.dart';
 
 
 class Search extends StatefulWidget {
-
-  Search();
-
   @override
   State<StatefulWidget> createState() =>_SearchState();
 }
 
 class _SearchState extends State<Search> {
-
   bool isSearching = false;
-  TextEditingController searchField = TextEditingController(text: 'Burrito');
+  TextEditingController searchField = TextEditingController();
+
+  FoodItemList myList;
+
+  _SearchState(){
+    myList = FoodItemList.within(miles: 5, complete: (){setState(() {});});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,20 +107,11 @@ class _SearchState extends State<Search> {
   }
 
   Widget _currentSearch(){
-    List<Query> searchComponents = [
-      Firestore.instance.collection('fooddata').orderBy('name').startAt([searchField.text]).endAt([searchField.text.length <=0? '': searchField.text+'\uf8ff']),
-      Firestore.instance.collection('fooddata').where('categories', arrayContains: searchField.text),
-      Firestore.instance.collection('fooddata').where('price', isLessThanOrEqualTo: isNum(searchField.text)?double.parse(searchField.text):-0.1),
-    ];
-    return FoodItemList(searchComponents, key: Key(searchField.text));
-  }
-
-  bool isNum(String text){
-    try{
-      var value = double.parse(text);
-    } on FormatException {
-      return false;
-    }
-    return true;
+    return ListView(
+      children: <Widget>[
+        Container(),
+        FoodItemListView(myList.searchBy(query: searchField.text), myList.users, key: Key(searchField.text)),
+      ],
+    );
   }
 }

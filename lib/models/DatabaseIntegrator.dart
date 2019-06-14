@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 class DatabaseIntegrator{
 
-  static Widget foodImage(String imageId) {
+  static Widget foodImage(String imageId) { // FoodItem
     if(imageId == null){
       return Container(
         color: Colors.grey,
@@ -31,7 +28,7 @@ class DatabaseIntegrator{
     );
   }
 
-  static Widget userImage(String uid) {
+  static Widget userImage(String uid) { // Profile
     if(uid == null){
       return Container(
         color: Colors.grey,
@@ -55,7 +52,7 @@ class DatabaseIntegrator{
     );
   }
 
-  static Widget storefrontImage(String cookID) {
+  static Widget storefrontImage(String cookID) { // Order
     if(cookID == null){
       return Container(
         color: Colors.grey,
@@ -79,7 +76,7 @@ class DatabaseIntegrator{
     );
   }
 
-  static Future<String> nameAbbreviated(String uid) async {
+  static Future<String> nameAbbreviated(String uid) async { // Order, FoodItem
     DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(uid).get();
     if(!snapshot.exists || snapshot.data['kitchenname'] == null){
       return 'No Name';
@@ -87,7 +84,7 @@ class DatabaseIntegrator{
     return '${snapshot.data['firstname']} ${snapshot.data['lastname'].toString().substring(0,1)}.';
   }
 
-  static Future<String> nameFull(String uid) async {
+  static Future<String> nameFull(String uid) async { // Order, FoodItem
     DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(uid).get();
     if(!snapshot.exists){
       return 'No Name';
@@ -95,7 +92,7 @@ class DatabaseIntegrator{
     return '${snapshot.data['firstname']} ${snapshot.data['lastname']}';
   }
 
-  static Future<GeoPoint> loc(String uid) async {
+  static Future<GeoPoint> loc(String uid) async { // FoodItem
     DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(uid).get();
     if(!snapshot.exists || snapshot.data['kitchenname'] == null){
       return null;
@@ -103,7 +100,7 @@ class DatabaseIntegrator{
     return snapshot.data['loc'];
   }
 
-  static Future<String> kitchenName(String uid) async {
+  static Future<String> kitchenName(String uid) async { // Order, FoodItem
     DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(uid).get();
     if(!snapshot.exists || snapshot.data['kitchenname'] == null){
       return 'No Kitchen Name';
@@ -111,7 +108,7 @@ class DatabaseIntegrator{
     return snapshot.data['kitchenname'];
   }
 
-  static Future<bool> dineInAvailable(String uid) async {
+  static Future<bool> dineInAvailable(String uid) async { // FoodItem
     DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(uid).get();
     if(!snapshot.exists || snapshot.data['dineInAvailable'] == null){
       return false;
@@ -119,7 +116,7 @@ class DatabaseIntegrator{
     return snapshot.data['dineInAvailable'];
   }
 
-  static Future<String> foodName(String foodId) async{
+  static Future<String> foodName(String foodId) async{ // Order
     DocumentSnapshot foodItem = await Firestore.instance.collection('fooddata').document(foodId).get();
     if(!foodItem.exists || foodItem.data['name'] == null){
       return 'No Food Name';
@@ -127,7 +124,7 @@ class DatabaseIntegrator{
     return foodItem.data['name'];
   }
 
-  static Future<double> cooktTake() async{
+  static Future<double> cooktTake() async{ // Order
     DataSnapshot snapshot = await FirebaseDatabase.instance.reference().child('properties').once();
     if(snapshot.value['cookttake'] == null){
       return -1;
@@ -135,7 +132,7 @@ class DatabaseIntegrator{
     return snapshot.value['cookttake'].toDouble();
   }
 
-  static String simplifiedDate(DateTime date){
+  static String simplifiedDate(DateTime date){ // Order
     String month;
     String fullDate;
 
@@ -177,7 +174,7 @@ class DatabaseIntegrator{
     return '$fullDate at ${date.hour%12==0?'12':date.hour%12}${date.minute==0? '': ':${date.minute}'} ${date.hour>11?'PM':'AM'}';
   }
 
-  static String dayOfTheWeek(int weekday){
+  static String dayOfTheWeek(int weekday){ // Order
     switch(weekday){
       case 1:
         return 'Monday';
@@ -197,6 +194,4 @@ class DatabaseIntegrator{
         return 'ERROR';
     }
   }
-
-
 }

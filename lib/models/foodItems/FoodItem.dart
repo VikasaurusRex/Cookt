@@ -6,10 +6,12 @@ import 'package:cookt/models/foodItems/Option.dart';
 
 class FoodItem {
 
-  List<dynamic> categories;
+  // TODO: Automatically load reviews and options on load.
+
+  List<String> categories;
   String description;
   bool isHosting;
-  List<dynamic> likedBy;
+  List<String> likedBy;
   String name;
   List<String> images;
   double price;
@@ -121,11 +123,19 @@ class FoodItem {
     map['price'] = price;
     map['timeUpdated'] = DateTime.now();
 
-    updateFields(map, ref);
-  }
-
-  void updateFields(Map<String, dynamic> map, DocumentReference ref) {
     ref.updateData(map);
+  }
+  
+  void toggleFavorite(String uid){
+    if(likedBy.contains(uid))
+      likedBy.remove(uid);
+    else
+      likedBy.add(uid);
+
+    Map<String, dynamic> map = Map();
+    map['likedBy'] = likedBy;
+
+    reference.updateData(map);
   }
 
   bool operator ==(other) {

@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'SaleConsole.dart';
 import 'MyFoodItems.dart';
 
-import 'EditFoodItem.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class SaleHome extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -25,8 +22,8 @@ class _SaleHomeState extends State<SaleHome> {
 
     _children = [
       // TODO: Add Selections to SaleConsole
-      SaleConsole(),
       MyFoodItems(),
+      SaleConsole(),
     ];
 
     return Scaffold(
@@ -36,13 +33,13 @@ class _SaleHomeState extends State<SaleHome> {
         onTap: onTabTapped, // new
         currentIndex: _currentIndex, // new
         items: [
-          new BottomNavigationBarItem(
-            icon: Icon(Icons.store),
-            title: Text('Incoming Orders'),
-          ),
-          new BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: Icon(Icons.local_pizza),
             title: Text('My Food Items'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.store),
+            title: Text('Incoming Orders'),
           ),
         ],
       ),

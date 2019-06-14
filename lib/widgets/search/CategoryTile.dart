@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class CategoryTile extends StatelessWidget{
   String category;
   VoidCallback onTileTapped;

@@ -509,7 +509,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
                 child: Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Container(
-                    width: 250,
+                    width: 200,
                     height: 165,
                     child: ListView.builder(
                       itemCount: option.options.length,
@@ -517,7 +517,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Container(
-                            width: 150,
+                            width: 100,
                             height: 35,
                             child: TextField(
                               controller: optionsControllers[i],
@@ -662,14 +662,7 @@ class _EditFoodItemState extends State<EditFoodItem> {
       ref.delete();
     });
 
-    //TODO: Delete Comment
-//    Navigator.of(context).pop(
-//      MaterialPageRoute(
-//        builder: (BuildContext context) {
-//          return MyFoodItems();
-//        },
-//      ),
-//    );
+    Navigator.of(context).pop();
   }
 
   Future<void> _checkErrorsDialog() async {

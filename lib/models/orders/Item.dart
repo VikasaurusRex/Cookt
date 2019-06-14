@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:cookt/models/orders/Order.dart';
 import 'package:cookt/models/orders/Selection.dart';
 
 class Item {
+
+  // TODO: Automatically load Selections from the load of an item.
+
   final String foodID;
   bool prepared; // TODO: Implement prepared
   double price;
-  int quantity; // TODO: Implement Quantity on OrderTiles in Home and in FoodItemView
+  int quantity;
 
   DocumentReference reference;
 
@@ -127,6 +128,6 @@ class Item {
   }
 
   bool operator ==(other) {
-    return (other is Item && other.reference == reference && other.price == price && other.quantity == quantity);
+    return (other is Item && other.reference == reference && other.price == price);
   }
 }

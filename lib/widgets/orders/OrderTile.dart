@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'dart:io';
 
 import 'package:location/location.dart';
 import 'dart:convert';
@@ -284,17 +283,16 @@ class _OrderTileState extends State<OrderTile> {
             children: <Widget>[
               DatabaseIntegrator.storefrontImage(order.cookID),
               Center(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white30,
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('$_kitchenName', style: Theme.of(context).textTheme.headline.apply(fontWeightDelta: 2),),
-                    ),
+//                child: BackdropFilter(
+//                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white70,
+                    borderRadius: BorderRadius.circular(0.0),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('$_kitchenName', style: Theme.of(context).textTheme.headline.apply(fontWeightDelta: 2),),
                   ),
                 ),
               ),
@@ -517,7 +515,8 @@ class _OrderTileState extends State<OrderTile> {
       items.remove(item);
       calculatePrice();
       if(items.length <= 0){
-        widget.deleteOrder(order);
+        print('no items');
+        order.reference.delete();
       }
     });
   }

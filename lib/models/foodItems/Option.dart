@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'package:cookt/models/foodItems/FoodItem.dart';
 
 class Option {
   int maxSelection;

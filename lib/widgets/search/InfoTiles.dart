@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 
-
-import 'package:cookt/models/orders/Item.dart';
-import 'package:cookt/models/DatabaseIntegrator.dart';
-import 'package:cookt/models/orders/Selection.dart';
-
 class InfoTiles extends StatefulWidget {
   final List<dynamic> labels;
 

@@ -6,6 +6,9 @@ import 'package:cookt/models/orders/Item.dart';
 import 'package:cookt/models/orders/Selection.dart';
 
 class Order {
+
+  // TODO: Automatically load items
+
   String cookID;
   String customerID;
   String lastTouchedID;
@@ -120,6 +123,7 @@ class Order {
   void acceptFinishOrder(){
     Map<String, dynamic> data  = Map();
     data['status'] = status==Status.accepted?Status.finished:Status.accepted;
+    data['active'] = status==Status.accepted? false: true;
     data['lastTouchedID'] = 'usercook';
     data['lastTouchedTime'] = DateTime.now();
 

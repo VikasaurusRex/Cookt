@@ -66,7 +66,7 @@ class _IncomingOrderTileState extends State<IncomingOrderTile> {
           children: <Widget>[
             Padding(
               padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text('${order.active? 'Ready by':'Cancelled by ${order.lastTouchedID == 'usercook'? 'you at': 'customer at'}'} ${DatabaseIntegrator.simplifiedDate(order.active?order.pickupTime:order.lastTouchedTime)}'),
+              child: Text('${order.active? 'Ready by':order.status == Status.finished?'Completed at':'Cancelled by ${order.lastTouchedID == 'usercook'? 'you at': 'customer at'}'} ${DatabaseIntegrator.simplifiedDate(order.active?order.pickupTime:order.lastTouchedTime)}'),
             ),
             Container(
               color: Colors.grey,
