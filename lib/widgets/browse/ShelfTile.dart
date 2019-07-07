@@ -26,7 +26,7 @@ class _ShelfTileState extends State<ShelfTile>{
 
   _ShelfTileState(this.item, this.user){
     if(user == null){
-      user = User.newUser('', '');
+      user = User.newUser('', '', '');
       Firestore.instance.collection('users').document(item.uid).get().then((snap){
         setState(() {
           user = User.fromSnapshot(snap);
@@ -67,7 +67,7 @@ class _ShelfTileState extends State<ShelfTile>{
                   alignment: AlignmentDirectional.topEnd,
                   children: <Widget>[
                     AspectRatio(
-                      aspectRatio: 3,
+                      aspectRatio: 2,
                       child: DatabaseIntegrator.foodImage(item.images[0]),
                     ),
                     Padding(

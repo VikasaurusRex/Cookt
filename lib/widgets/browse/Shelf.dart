@@ -26,7 +26,7 @@ class Shelf extends StatelessWidget {
               child: Text('$title', style: Theme.of(context).textTheme.title.apply(fontWeightDelta: 1),),
             ),
             items.length > 0? Container(
-                height: 185,
+                height: 229,
                 child:
                 ListView(
                   scrollDirection: Axis.horizontal,

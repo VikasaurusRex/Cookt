@@ -50,6 +50,9 @@ class _OrderTileState extends State<OrderTile> {
 
   double _taxRate = 0;
   double _cooktRate = 0;
+  double _cooktConstant = 0;
+  double _stripeRate = 0;
+  double _stripeConstant = 0;
   double _deliveryQuote = 0;
   String _kitchenName = "";
 
@@ -71,7 +74,7 @@ class _OrderTileState extends State<OrderTile> {
     });
     setState(() {
       order.subtotalPrice = price;
-      order.cooktPrice = (price*_cooktRate);
+      order.cooktPrice = (price*_cooktRate) + _cooktConstant;
       order.taxPrice = (price*_taxRate);
     });
 
@@ -83,6 +86,11 @@ class _OrderTileState extends State<OrderTile> {
     }else{
       order.deliveryPrice = 0;
     }
+
+    // TODO: Factor in cooktcontant and otherconstant
+
+    price += (price*_stripeRate) + _stripeConstant;
+
     order.totalPrice = price;
   }
 
@@ -130,7 +138,7 @@ class _OrderTileState extends State<OrderTile> {
     body['pickup_address'] = '${cookAddress.addressLine}';
     body['dropoff_address'] = '${myAddress.addressLine}';
 
-    updateTax(zip: cookAddress.postalCode);
+    updateTax(address: cookAddress);
 
     http.post(url,headers: headers,body: body).then((response){
       Map<String, dynamic> quote = jsonDecode(response.body);
@@ -146,28 +154,50 @@ class _OrderTileState extends State<OrderTile> {
     });
   }
 
-  void updateTax({String zip}){
-    String url = 'https://api.taxjar.com/v2/rates/$zip';
+  void updateTax({Address address}){
+    String url = 'https://core.taxcloud.com/api/rate-finder-details/${Uri.encodeComponent(address.featureName)}/${Uri.encodeComponent(address.locality)}/${Uri.encodeComponent(address.adminArea)}/${address.postalCode}/${address.countryCode}'; // S/Yosemite/St/Greenwood/Village/CO/80111/US'; //
+    print('$url');
 
     Map<String, String> headers = Map();
-    headers['Authorization'] = 'Bearer 0fa76332396eaec7be5f9c63c143fc5e';
-    headers['Content-Type'] = 'application/json';
+    //headers['authorization'] = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUYXhDbG91ZCBKV1QiLCJqdGkiOiJiYjc0YjlhMy03YzUyLTRkMmYtYThjZS1kNzE0YTE0MDc4YmEiLCJtZXJjaGFudGlkIjoiMzg3MjMiLCJjb250YWN0aWQiOiIzODU3MSIsIklEIjoiMzg1NzEiLCJtYXNxdWVyYWRlIjoiRmFsc2UiLCJWaWtyYW0gSGVnZGUiOiJUb2tlbkF1dGgiLCJleHAiOjE1NjIxOTU0NDcsImlzcyI6IlRheENsb3VkLlNlY3VyaXR5LkJlYXJlciIsImF1ZCI6IlRheENsb3VkLlNlY3VyaXR5LkJlYXJlciJ9.nfwNiACCJvnJ2KE5P1j5AeyHFbf-vz0lC8g5E54p8gI';
+    headers['content-type'] =  'application/json';
+    headers['Origin'] = 'https://taxcloud.com';
+    headers['Referer']  = 'https://taxcloud.com/go/find-a-rate/';
+    headers['accept'] = 'application/json';
 
-    http.get(url,headers: headers).then((response){
+    http.post(url, headers: headers).then((response){
+      print(response.statusCode);
+
       Map<String, dynamic> quote = jsonDecode(response.body);
-      if(quote['rate'] == null){
+
+      if(quote['salesTaxRate'] == null){
         return;
       }else{
-        _taxRate = double.parse(quote['rate']['combined_rate']);
-        order.taxZip = zip;
+        _taxRate = double.parse(quote['salesTaxRate'])/100;
+        order.taxZip = address.postalCode;
         calculatePrice();
       }
     });
   }
 
   void refresh(){
-    DatabaseIntegrator.cooktTake().then((val) => setState(() {
+    DatabaseIntegrator.cooktRate().then((val) => setState(() {
       _cooktRate = val;
+      calculatePrice();
+    }));
+
+    DatabaseIntegrator.cooktConstant().then((val) => setState(() {
+      _cooktConstant = val;
+      calculatePrice();
+    }));
+
+    DatabaseIntegrator.stripeRate().then((val) => setState(() {
+      _stripeRate = val;
+      calculatePrice();
+    }));
+
+    DatabaseIntegrator.otherConstant().then((val) => setState(() {
+      _stripeConstant = val;
       calculatePrice();
     }));
 
@@ -369,7 +399,7 @@ class _OrderTileState extends State<OrderTile> {
         //TODO: Implement proper pricing for cookt fee, total fee, and tax
         Text('Subtotal: \$${order.subtotalPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
         Text('Tax: \$${order.taxPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
-        Text('Cookt Fee: \$${order.cooktPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
+        Text('Fees: \$${(order.cooktPrice + order.stripePrice).toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
         Text('Delivery: \$${order.deliveryPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
         Padding(padding: EdgeInsets.symmetric(vertical: 2.0),),
         Container(
@@ -440,7 +470,8 @@ class _OrderTileState extends State<OrderTile> {
             RaisedButton(
               color: Color(0xFFCCFFCC),
               onPressed: (){
-                if(_taxRate > 0 && _cooktRate > 0 && ((order.orderType == OrderType.postmates && order.deliveryPrice > 0) || order.orderType != OrderType.postmates))
+                calculatePrice();
+                if(order.totalPrice >= 0 && _taxRate > 0 && (_cooktRate > 0 || _cooktConstant > 0) && (_stripeRate > 0 || _stripeConstant > 0) && ((order.orderType == OrderType.postmates && order.deliveryPrice > 0) || order.orderType != OrderType.postmates))
                   widget.placeOrder(order);
                 else
                   _networkErrorDialog();

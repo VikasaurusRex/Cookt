@@ -124,12 +124,33 @@ class DatabaseIntegrator{
     return foodItem.data['name'];
   }
 
-  static Future<double> cooktTake() async{ // Order
+  static Future<double> cooktRate() async{ // Order
     DataSnapshot snapshot = await FirebaseDatabase.instance.reference().child('properties').once();
-    if(snapshot.value['cookttake'] == null){
+    if(snapshot.value['cooktrate'] == null){
       return -1;
     }
-    return snapshot.value['cookttake'].toDouble();
+    return snapshot.value['cooktrate'].toDouble(); // TODO: Change from cookttake to cooktrate
+  }
+  static Future<double> cooktConstant() async{ // Order
+    DataSnapshot snapshot = await FirebaseDatabase.instance.reference().child('properties').once();
+    if(snapshot.value['cooktconstant'] == null){
+      return -1;
+    }
+    return snapshot.value['cooktconstant'].toDouble();
+  }
+  static Future<double> stripeRate() async{ // Order
+    DataSnapshot snapshot = await FirebaseDatabase.instance.reference().child('properties').once();
+    if(snapshot.value['striperate'] == null){
+      return -1;
+    }
+    return snapshot.value['striperate'].toDouble();
+  }
+  static Future<double> otherConstant() async{ // Order
+    DataSnapshot snapshot = await FirebaseDatabase.instance.reference().child('properties').once();
+    if(snapshot.value['stripeconstant'] == null){
+      return -1;
+    }
+    return snapshot.value['stripeconstant'].toDouble();
   }
 
   static String simplifiedDate(DateTime date){ // Order

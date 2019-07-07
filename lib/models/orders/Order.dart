@@ -22,6 +22,7 @@ class Order {
   double taxPrice;
   double cooktPrice;
   double deliveryPrice;
+  double stripePrice;
   double totalPrice;
   String taxZip;
   bool active; // If false the order is either cancelled or finished.
@@ -45,6 +46,7 @@ class Order {
         this.taxPrice = -1,
         this.cooktPrice = -1,
         this.deliveryPrice = -1,
+        this.stripePrice = -1,
         this.totalPrice = -1,
         this.taxZip = "00000",
         this.active = true,
@@ -64,6 +66,7 @@ class Order {
         assert(map['taxPrice'] != null),
         assert(map['cooktPrice'] != null),
         assert(map['deliveryPrice'] != null),
+        assert(map['stripePrice'] != null),
         assert(map['totalPrice'] != null),
         assert(map['taxZip'] != null),
         assert(map['active'] != null),
@@ -80,6 +83,7 @@ class Order {
         this.taxPrice = map['taxPrice'].toDouble(),
         this.cooktPrice = map['cooktPrice'].toDouble(),
         this.deliveryPrice = map['deliveryPrice'].toDouble(),
+        this.stripePrice = map['stripePrice'].toDouble(),
         this.totalPrice = map['totalPrice'].toDouble(),
         this.taxZip = map['taxZip'],
         this.active = map['active'];
@@ -105,6 +109,7 @@ class Order {
     map['taxPrice'] = taxPrice;
     map['cooktPrice'] = cooktPrice;
     map['deliveryPrice'] = deliveryPrice;
+    map['stripePrice'] = stripePrice;
     map['totalPrice'] = totalPrice;
     map['taxZip'] = taxZip;
     map['active'] = active;
@@ -150,6 +155,7 @@ class Order {
     map['taxPrice'] = taxPrice;
     map['cooktPrice'] = cooktPrice;
     map['deliveryPrice'] = deliveryPrice;
+    map['stripePrice'] = stripePrice;
     map['totalPrice'] = totalPrice;
     map['taxZip'] = taxZip;
 
@@ -187,6 +193,7 @@ class Order {
     map['taxPrice'] = -1;
     map['cooktPrice'] = -1;
     map['deliveryPrice'] = -1;
+    map['stripePrice'] = -1;
     map['totalPrice'] = -1;
     map['active'] = true;
     map['taxZip'] = "00000";

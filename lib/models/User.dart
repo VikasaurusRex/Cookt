@@ -7,9 +7,11 @@ class User {
   String firstname;
   String lastname;
   String kitchenname;
+  String email;
   bool dineInAvailable;
   final bool verified;
   GeoPoint loc;
+  String custId;
 
   DocumentReference reference;
 
@@ -17,24 +19,29 @@ class User {
       :
         assert(map['firstname'] != null),
         assert(map['lastname'] != null),
+        assert(map['email'] != null),
         this.firstname = map['firstname'],
         this.lastname = map['lastname'],
+        this.email = map['email'],
         this.kitchenname = map['kitchenname'],
         this.verified = map['verified'],
-        this.loc = map['loc'];
+        this.loc = map['loc'],
+        this.custId = map['custId'];
 
   User.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
 
-  User.newUser(String firstname, String lastname)
+  User.newUser(String firstname, String lastname, String email)
       :
         this.firstname = firstname,
         this.lastname = lastname,
+        this.email = null,
         this.kitchenname = null,
         this.dineInAvailable = null,
         this.verified = null,
         this.loc = null,
-        this.reference = null;
+        this.reference = null,
+        this.custId = null;
 
   @override
   String toString() => "${reference.documentID} $firstname $lastname";
@@ -43,13 +50,22 @@ class User {
     Map<String, dynamic> map = Map();
     map['firstname'] = firstname;
     map['lastname'] = lastname;
+    map['email'] = email;
     map['kitchenname'] = kitchenname;
     map['dineInAvailable'] = dineInAvailable;
     map['verified'] = verified;
     map['loc'] = loc;
+    map['custId'] = custId;
 
     Firestore.instance.collection('users').document(uid).updateData(map);
     this.reference = Firestore.instance.collection('users').document(uid);
+  }
+
+  void updateLocation(double lat, double long) {
+    Map<String, dynamic> map = Map();
+    map['loc'] = GeoPoint(lat, long);
+
+    reference.updateData(map);
   }
 
   bool operator ==(other) {
@@ -86,7 +102,6 @@ class User {
       User user = User.fromSnapshot(doc);
       users[user.reference.documentID] = user;
     });
-    print(users);
     return users;
   }
 }

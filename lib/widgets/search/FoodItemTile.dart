@@ -27,7 +27,7 @@ class _FoodItemTileState extends State<FoodItemTile>{
 
   _FoodItemTileState(this.item, this.user){
     if(user == null){
-      user = User.newUser('', '');
+      user = User.newUser('', '', '');
       Firestore.instance.collection('users').document(item.uid).get().then((snap){
         setState(() {
           user = User.fromSnapshot(snap);

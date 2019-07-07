@@ -125,7 +125,7 @@ class _MyFoodItemsState extends State<MyFoodItems> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Are you sure you want to start selling ${foodItem.name}? Be sure you are ready for incoming orders.'),
+                Text('Are you sure you want to start selling ${foodItem.name}s? Be sure you are ready for incoming orders.'),
               ],
             ),
           ),

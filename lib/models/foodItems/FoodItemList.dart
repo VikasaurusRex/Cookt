@@ -48,10 +48,8 @@ class FoodItemList {
   }
 
   List<FoodItem> byCategory({@required String category}){
-    print('Doing the search thing on ${category} ${items.length}');
     List<FoodItem> filteredItems = List();
     items.forEach((item){
-      print('$item $category');
       if(item.categories.contains(category)){
         filteredItems.add(item);
       }
@@ -59,10 +57,20 @@ class FoodItemList {
     return filteredItems;
   }
 
-  List<FoodItem> byPrice({@required double above, double below}){
+  List<FoodItem> byPrice({double above, double below}){
     List<FoodItem> filteredItems = List();
     items.forEach((item){
       if((below == null || item.price <= below) && (above == null || item.price >= above)){
+        filteredItems.add(item);
+      }
+    });
+    return filteredItems;
+  }
+  
+  List<FoodItem> byFavorites(String uid){
+    List<FoodItem> filteredItems = List();
+    items.forEach((item){
+      if(item.likedBy.contains(uid)){
         filteredItems.add(item);
       }
     });

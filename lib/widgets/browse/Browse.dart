@@ -28,15 +28,15 @@ class _BrowseState extends State<Browse> {
           // TODO: Make flashy dummy shelves and dummy FoodItemListViews with grey swipeys
 
           shelfLabels.addAll(FoodItem.allCategories);
-          shelfLabels.addAll(['Cheap Bites (\$)', 'Good Eats (\$\$)', 'Best on the Menu (\$\$\$)']);
+          shelfLabels.addAll(['Cheap Bites (\$)', 'Affordable Meals (\$\$)', 'Fancier Cuisine (\$\$\$)']);
           // TODO: Set all shelves possible.
           // All categories, price
 
           shelfContents.addAll(FoodItem.allCategories.map((cat) => myList.byCategory(category: cat)).toList());
           shelfContents.addAll([
-            myList.byPrice(below: 10),
-            myList.byPrice(above: 10, below: 20),
-            myList.byPrice(above: 20)
+            myList.byPrice(below: 8),
+            myList.byPrice(above: 8, below: 15),
+            myList.byPrice(above: 15)
           ]);
 
 
@@ -48,7 +48,6 @@ class _BrowseState extends State<Browse> {
               ind = rng.nextInt(shelfLabels.length);
             shelfIndeces.add(ind);
           }
-          print('Loaded $shelfIndeces');
           shelfIndeces.map((ind){print('${shelfLabels[ind]}');});
         });
       });

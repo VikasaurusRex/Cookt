@@ -3,6 +3,12 @@ import 'package:cookt/models/DatabaseIntegrator.dart';
 
 import 'package:cookt/widgets/sell/SaleHome.dart';
 
+import 'package:cookt/widgets/profile/Favorites.dart';
+import 'package:cookt/widgets/profile/Payment.dart';
+import 'package:cookt/widgets/profile/Help.dart';
+import 'package:cookt/widgets/profile/Settings.dart';
+import 'package:cookt/widgets/profile/Address.dart';
+
 class Profile extends StatefulWidget {
 
   Profile();
@@ -61,27 +67,67 @@ class _ProfileState extends State<Profile> {
           ProfileButton(
             icon: Icons.favorite_border,
             label: 'Favorites',
-            onTap: null,
+            onTap: (){
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return Favorites();
+                  },
+                ),
+              );
+            },
           ),
           ProfileButton(
             icon: Icons.credit_card,
             label: 'Payment',
-            onTap: null,
+            onTap: (){
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return Payment();
+                  },
+                ),
+              );
+            },
           ),
           ProfileButton(
             icon: Icons.person,
             label: 'Help',
-            onTap: null,
+            onTap: (){
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return Help();
+                  },
+                ),
+              );
+            },
           ),
           ProfileButton(
             icon: Icons.settings,
             label: 'Settings',
-            onTap: null,
+            onTap: (){
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return Settings();
+                  },
+                ),
+              );
+            },
           ),
           ProfileButton(
             icon: Icons.location_on,
             label: 'Address',
-            onTap: null,
+            onTap: (){
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return Address();
+                  },
+                ),
+              );
+            },
           ),
           ProfileButton(
             icon: Icons.attach_money,

@@ -29,6 +29,8 @@ dependencies:
   location: ^1.4.1
   geocoder: ^0.1.2
   random_string: ^0.0.2
+  flutter_email_sender: ^2.0.3
+  stripe_payment: ^0.1.0
 
 dev_dependencies:
   flutter_test:

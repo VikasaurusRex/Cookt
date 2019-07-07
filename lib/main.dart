@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stripe_payment/stripe_payment.dart';
+
 import 'package:cookt/widgets/browse/Browse.dart';
 import 'package:cookt/widgets/search/Search.dart';
 import 'package:cookt/widgets/orders/Orders.dart';
 import 'package:cookt/widgets/profile/Profile.dart';
 
-import 'package:cookt/widgets/sell/SaleHome.dart';
-import 'package:cookt/widgets/browse/FoodItemView.dart';
-import 'package:cookt/widgets/sell/EditFoodItem.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cookt/widgets/profile/Favorites.dart';
+import 'package:cookt/widgets/profile/Payment.dart';
+import 'package:cookt/widgets/profile/HelpNewIssue.dart';
+import 'package:cookt/widgets/profile/Settings.dart';
+import 'package:cookt/widgets/profile/Address.dart';
 
 import 'package:cookt/models/DatabaseIntegrator.dart';
 
@@ -51,6 +55,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
 
+    StripeSource.setPublishableKey("pk_test_tUqX0hO8KO1d3yf43EcqNwKh00glibgjaJ");
     _specializedIndices['CurrentSearch'] = 0;
 
     _appBars = [
@@ -61,7 +66,7 @@ class _HomeState extends State<Home> {
     ];
 
     _children = [
-      Browse(),//FoodItemView(reference: Firestore.instance.collection('fooddata').document('1yzdDBacqdeRxewvuczy'),),
+      Browse(),
       Search(),
       Orders(),
       Profile()
