@@ -29,7 +29,7 @@ class _BrowseState extends State<Browse> {
 
           shelfLabels.addAll(FoodItem.allCategories);
           shelfLabels.addAll(['Cheap Bites (\$)', 'Affordable Meals (\$\$)', 'Fancier Cuisine (\$\$\$)']);
-          // TODO: Set all shelves possible.
+          // Set all shelves possible.
           // All categories, price
 
           shelfContents.addAll(FoodItem.allCategories.map((cat) => myList.byCategory(category: cat)).toList());

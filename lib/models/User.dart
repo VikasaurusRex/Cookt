@@ -104,4 +104,8 @@ class User {
     });
     return users;
   }
+
+  static void updateAddress(GeoPoint loc, {String uid}){
+    Firestore.instance.collection('users').document(uid).updateData({'loc': loc});
+  }
 }

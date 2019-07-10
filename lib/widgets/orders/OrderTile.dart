@@ -259,46 +259,57 @@ class _OrderTileState extends State<OrderTile> {
   @override
   Widget build(BuildContext context) {
     //print('  Number of items in order: ${items.length}');
-    return Container(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(8.0, 8, 8, 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            _kitchenImage(),
-            _statusLabel(),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Text((order.status != Status.finished && order.active == false)? _time['CANCELLED'] :_time[order.status], style: Theme.of(context).textTheme.subhead.apply(fontSizeFactor: 0.75),),
-            ),
-            _orderOptions(),
-            Padding(
-              padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
-              child: Container(
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(5.0),
+          boxShadow: [
+            new BoxShadow(
+              color: Colors.black45,
+              offset: Offset(5.0, 5.0),
+              blurRadius: 10.0,
+            )
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(8.0, 8, 8, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              _kitchenImage(),
+              _statusLabel(),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text((order.status != Status.finished && order.active == false)? _time['CANCELLED'] :_time[order.status], style: Theme.of(context).textTheme.subhead.apply(fontSizeFactor: 0.75),),
+              ),
+              _orderOptions(),
+              Padding(
+                padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                child: Container(
+                  color: Colors.grey,
+                  height: 1.0,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 4.0),
+                child: Column(
+                  children: items.map((item) => ItemTile(item, deleteItem, order.status == Status.pending && order.active == true, key: Key(item.toString()), calculatePrice: calculatePrice,)).toList(),
+                ),
+              ),
+              Container(
                 color: Colors.grey,
                 height: 1.0,
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 4.0),
-              child: Column(
-                children: items.map((item) => ItemTile(item, deleteItem, order.status == Status.pending && order.active == true, key: Key(item.toString()), calculatePrice: calculatePrice,)).toList(),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 4.0),
+                child: _priceBreakdown(),
               ),
-            ),
-            Container(
-              color: Colors.grey,
-              height: 1.0,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 4.0),
-              child: _priceBreakdown(),
-            ),
-            _nextLineOptions(),
-            Container(
-              color: Colors.grey,
-              height: 3.0,
-            ),
-          ],
+              _nextLineOptions(),
+            ],
+          ),
         ),
       ),
     );
@@ -377,7 +388,7 @@ class _OrderTileState extends State<OrderTile> {
           }:null,
           child: Container(
             decoration: BoxDecoration(
-              color: order.status == Status.pending && order.active == true?Color(0xFFCCFFCC):Colors.transparent,
+              color: order.status == Status.pending && order.active == true?Color(0xFFCCFFCC):Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(5.0),
             ),
             child: Padding(padding: EdgeInsets.all(4),

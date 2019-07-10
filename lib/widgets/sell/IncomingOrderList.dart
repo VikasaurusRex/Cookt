@@ -27,12 +27,10 @@ class _IncomingOrderListState extends State<IncomingOrderList>  with AutomaticKe
           Order order = Order.fromSnapshot(snapshot);
           //print('  Found the snapshot ${snapshot.documentID}: ${snapshot.data}');
           if(!orders.contains(order)){
-            print('Not Contained');
             setState(() {
               orders.add(order);
             });
           }else{
-            print('Contained at: ${orders.indexOf(order)}');
             int index = orders.indexOf(order);
             setState(() {
               orders.removeAt(index);

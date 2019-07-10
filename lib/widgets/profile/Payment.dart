@@ -18,11 +18,6 @@ class _PaymentState extends State<Payment> {
 
   @override
   Widget build(BuildContext context) {
-    StripeSource.addSource().then((String token) {
-      Map<String, dynamic> map = Map();
-      map['custId'] = token;
-      Firestore.instance.collection('cards').document('usercustomer').setData(map);
-    });
     return Scaffold(
       appBar: AppBar(title: Text('Payment'),),
       body: Container(),

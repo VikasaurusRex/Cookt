@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cookt/models/DatabaseIntegrator.dart';
+import 'package:cookt/services/PaymentService.dart';
+
+import 'package:stripe_payment/stripe_payment.dart';
 
 import 'package:cookt/widgets/sell/SaleHome.dart';
 
@@ -81,13 +84,9 @@ class _ProfileState extends State<Profile> {
             icon: Icons.credit_card,
             label: 'Payment',
             onTap: (){
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return Payment();
-                  },
-                ),
-              );
+              StripeSource.addSource().then((String token) {
+                PaymentService().addCard(token);
+              });
             },
           ),
           ProfileButton(

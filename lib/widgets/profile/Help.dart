@@ -96,44 +96,4 @@ class _HelpState extends State<Help> {
       ),
     );
   }
-
-  Future<void> _presentDialog(FoodItem foodItem) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Are you sure?'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Are you sure you want to start selling ${foodItem.name}s? Be sure you are ready for incoming orders.'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('Ok'),
-              onPressed: () {
-                Map<String, dynamic> map = Map();
-                map['isHosting'] = true;
-                foodItem.reference.updateData(map);
-                setState(() {
-                  foodItem.isHosting = true;
-                });
-                Navigator.of(context).pop();
-              },
-            ),
-            FlatButton(
-              child: Text('Cancel'),
-              onPressed: (){
-                // set to false
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
