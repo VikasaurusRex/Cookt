@@ -9,6 +9,12 @@ import 'package:cookt/models/DatabaseIntegrator.dart';
 import 'InfoTiles.dart';
 
 class FoodItemTile extends StatefulWidget {
+
+  //TODO: Change the tile to have more information: price, distance, categories
+  // TODO: Blend everything into background
+  // TODO: Change squares to rectangles
+  // TODO: Make rounded everything rather than square
+
   final FoodItem item;
   final User user;
 

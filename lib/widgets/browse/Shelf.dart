@@ -15,7 +15,6 @@ class Shelf extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //print('Number of orders: ${orders.length}');
-
     return
 
         Column(
@@ -25,17 +24,21 @@ class Shelf extends StatelessWidget {
               padding: EdgeInsets.symmetric(horizontal: 8.0),
               child: Text('$title', style: Theme.of(context).textTheme.title.apply(fontWeightDelta: 1),),
             ),
-            items.length > 0? Container(
-                height: 229,
-                child:
-                ListView(
-                  scrollDirection: Axis.horizontal,
-                  shrinkWrap: true,
-                  children: items.map((item) => Container(
-                    width: 300,
-                    child: ShelfTile(item, users[item.uid], key: Key(item.toString()),),
-                  )).toList(),
-                )
+            items.length > 0? Padding(
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 30),
+              child: Container(
+                  height: 229,
+                  color: Theme.of(context).cardColor,
+                  child:
+                  ListView(
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    children: items.map((item) => Container(
+                      width: 300,
+                      child: ShelfTile(item, users[item.uid], key: Key(item.toString()),),
+                    )).toList(),
+                  )
+              ),
             )
 
                 :

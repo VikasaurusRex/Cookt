@@ -34,6 +34,7 @@ class _FoodItemViewState extends State<FoodItemView> {
   // TODO:  Find all view classes and delete firebase imports
   // TODO:  Go to all model classes and add helper methods that
   // TODO:    interface with the database to do what the original code was doing.
+  // TODO: Add price when quantity changes
 
   bool hasOrdered = false;
 

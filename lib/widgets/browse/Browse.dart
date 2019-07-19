@@ -15,6 +15,9 @@ class Browse extends StatefulWidget {
 
 class _BrowseState extends State<Browse> {
 
+  // TODO: Fix the shelves. the rounded square look mismatched
+  // TODO: Give everything space. Give large boundry, look at postmates
+
   FoodItemList myList;
   List<String> shelfLabels;
   List<List<FoodItem>> shelfContents;
@@ -66,7 +69,7 @@ class _BrowseState extends State<Browse> {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 20),
-          child: Text('Hand Picked', style: Theme.of(context).textTheme.title.apply(fontWeightDelta: 1, fontSizeFactor: 1.5),),
+          child: Text('Favorites', style: Theme.of(context).textTheme.title.apply(fontWeightDelta: 1, fontSizeFactor: 1.5),),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

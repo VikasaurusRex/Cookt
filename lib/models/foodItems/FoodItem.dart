@@ -29,7 +29,7 @@ class FoodItem {
     "Dessert",
     "Indian",
     "Italian",
-    "Juice",
+    "Juice", // TODO: Change to beverages
     "Korean",
     "Mediterranean",
     "Mexican",

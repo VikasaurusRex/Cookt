@@ -21,6 +21,10 @@ class EditFoodItem extends StatefulWidget {
 }
 
 class _EditFoodItemState extends State<EditFoodItem> {
+
+  //TODO: make categories different, more scrollier than bubblier
+  //TODO: Make Options on edit work
+
   // One TextEditingController for each form input:
   FoodItem editableItem = FoodItem.newItem();
   List<Image> images = List();

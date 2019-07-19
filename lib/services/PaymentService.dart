@@ -10,5 +10,17 @@ class PaymentService {
     });
   }
 
+  buyItem(price){
+    int processedPrice = price * 100;
+
+    Map<String ,dynamic> map = Map();
+    map['currency'] = 'usd';
+    map['amount'] = processedPrice;
+    map['description'] = 'Purchase of product'; // TODO: Edit this description
+
+    Firestore.instance.collection('users')
+        .document('usercustomer')
+        .collection('charges').add(map);
+  }
 
 }

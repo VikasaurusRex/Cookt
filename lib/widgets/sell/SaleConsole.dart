@@ -6,9 +6,12 @@ import 'IncomingOrderList.dart';
 
 class SaleConsole extends StatelessWidget {
 
-  final List<String> labels = ['Incoming', 'Previous',];
+  final List<String> labels = ['Incoming', 'Accepted', 'Finished',];
   final List<List<Query>> queries = [[
     Firestore.instance.collection('orders').where('status', isEqualTo: 'REQUESTED').where('active', isEqualTo: true).where('cookID', isEqualTo: 'usercook'),
+  ],
+  [
+
     Firestore.instance.collection('orders').where('status', isEqualTo: 'ACCEPTED').where('active', isEqualTo: true).where('cookID', isEqualTo: 'usercook'),
   ],
   [

@@ -46,8 +46,7 @@ class _ShelfTileState extends State<ShelfTile>{
           borderRadius: BorderRadius.circular(4.0),
           boxShadow: [
             new BoxShadow(
-              color: Colors.black45,
-              offset: Offset(5.0, 5.0),
+              color: Colors.black12,
               blurRadius: 10.0,
             )
           ],
@@ -64,11 +63,7 @@ class _ShelfTileState extends State<ShelfTile>{
             );
           },
           child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4.0),
-              border: Border.all(color: Colors.grey),
-              color: item.isHosting? Colors.white: Color(0xFFCBCBCB),
-            ),
+            color: item.isHosting? Colors.white: Color(0xFFCBCBCB),
             child: Padding(
               padding: EdgeInsets.all(8.0),
               child: Column(

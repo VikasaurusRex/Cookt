@@ -45,6 +45,12 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
+  // TODO: Everything interactable made uppercase
+  // TODO: Play with fonts and colors
+  // TODO: font with lots of space around it. Kern better
+  // TODO: Seller bio's so that people humanize the chefs.
+  // TODO: Model after gofundme or kickstarter or spotify
+
   int _currentIndex = 0;
 
   List<Widget> _children;
