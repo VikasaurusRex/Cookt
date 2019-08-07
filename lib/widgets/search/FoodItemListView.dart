@@ -17,7 +17,7 @@ class FoodItemListView extends StatelessWidget {
         child: items.length>0?
 
         Column(
-          children: items.map((item) => FoodItemTile(item, users[item.uid], key: Key(item.toString()),)).toList(),
+          children: items.map((item) => FoodItemTile(item, users[item.uid], true, key: Key(item.toString()),)).toList(),
         )
 
             :
@@ -33,7 +33,7 @@ class FoodItemListView extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.all(20),
                   // TODO: Change Text
-                  child: Text('Hmmm, couldn\'t find anything.', style: Theme.of(context).textTheme.title.apply(color: Colors.grey),),
+                  child: Text('Hmm, couldn\'t find anything.', style: Theme.of(context).textTheme.title.apply(color: Colors.grey),),
                 )
               ],
             ),

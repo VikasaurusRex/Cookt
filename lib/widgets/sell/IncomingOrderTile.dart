@@ -57,20 +57,32 @@ class _IncomingOrderTileState extends State<IncomingOrderTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: order.status != Status.accepted && order.active?Color(0xFFDDFFDD):Theme.of(context).canvasColor,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(8.0, 8, 8, 8),
-        child: Container(
-          child:  Column(
+    return Padding(
+      padding: EdgeInsets.all(8),
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10.0,
+            )
+          ],
+          color: Theme.of(context).cardColor,
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Text('${order.active? 'Ready by':order.status == Status.finished?'Completed at':'Cancelled by ${order.lastTouchedID == 'usercook'? 'you at': 'customer at'}'} ${DatabaseIntegrator.simplifiedDate(order.active?order.pickupTime:order.lastTouchedTime)}'),
+                child: Text(
+                  '${order.active? 'Ready by':order.status == Status.finished?'Completed at':'Cancelled by ${order.lastTouchedID == 'usercook'? 'you at': 'customer at'}'} ${order.active?DatabaseIntegrator.onlyTime(order.active?order.pickupTime:order.lastTouchedTime):DatabaseIntegrator.simplifiedDate(order.active?order.pickupTime:order.lastTouchedTime)}',
+                  style: order.active?Theme.of(context).textTheme.subtitle.apply(fontSizeFactor: 1.2):Theme.of(context).textTheme.subhead.apply(fontSizeFactor: 0.75),
+                ),
               ),
               Container(
-                color: Colors.grey,
+                color: Colors.black12,
                 height: 1.0,
               ),
               Padding(
@@ -80,18 +92,18 @@ class _IncomingOrderTileState extends State<IncomingOrderTile> {
                 ),
               ),
               Container(
-                color: Colors.grey,
+                color: Colors.black12,
                 height: 1.0,
               ),
               Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text('Total: \$$_totalPrice', style: Theme.of(context).textTheme.title,),
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text('Total: \$$_totalPrice', style: Theme.of(context).textTheme.title,),
               ),
               _orderOptions(),
             ],
           ),
         ),
-      ),
+      )
     );
   }
 
@@ -102,7 +114,7 @@ class _IncomingOrderTileState extends State<IncomingOrderTile> {
       children: <Widget>[
         Expanded(
           child: RaisedButton(
-            color: order.status == Status.accepted?Color(0xFFCCFFCC):Color(0xFF99FF99),
+            color: Theme.of(context).primaryColorLight,
             onPressed: (){
               if(order.status == Status.requested){
                 widget.acceptFinishOrder(order);
@@ -118,26 +130,23 @@ class _IncomingOrderTileState extends State<IncomingOrderTile> {
               else
                 _notPreparedError();
             },
-            child: Text(order.status == Status.accepted?'Finish':'Accept', style: TextStyle(color: Colors.green),),
+            child: Text(order.status == Status.accepted?'Finish':'Accept', style: TextStyle(color: Theme.of(context).primaryColor),),
           ),
         ),
         Padding(padding: EdgeInsets.symmetric(horizontal: 4.0),),
         Expanded(
           child: RaisedButton(
-            color: Color(0xFFFFCCCC),
+            color: Theme.of(context).primaryColorLight,
             onPressed: () {
               widget.cancelOrder(order);
             },
-            child: Text('Cancel', style: TextStyle(color: Colors.red),),
+            child: Text('Cancel', style: TextStyle(color: Theme.of(context).primaryColor),),
           ),
         )
       ],
     )
         :
-    Container(
-      height: 3,
-      color: Colors.grey,
-    );
+    Container();
   }
 
   Future<void> _notPreparedError() async {

@@ -10,8 +10,8 @@ class PaymentService {
     });
   }
 
-  buyItem(price){
-    int processedPrice = price * 100;
+  buyItem(double price){
+    int processedPrice = (price * 100).toInt();
 
     Map<String ,dynamic> map = Map();
     map['currency'] = 'usd';

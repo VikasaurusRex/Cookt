@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cookt/models/User.dart';
 import 'package:cookt/models/foodItems/FoodItem.dart';
-import 'ShelfTile.dart';
+import 'package:cookt/widgets/search/FoodItemTile.dart';
 
 class Shelf extends StatelessWidget {
   final String title;
@@ -14,43 +14,31 @@ class Shelf extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //print('Number of orders: ${orders.length}');
     return
 
-        Column(
+      items.length > 0? Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.0),
               child: Text('$title', style: Theme.of(context).textTheme.title.apply(fontWeightDelta: 1),),
             ),
-            items.length > 0? Padding(
-              padding: EdgeInsets.fromLTRB(0, 0, 0, 30),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 0, 0, 25),
               child: Container(
-                  height: 229,
-                  color: Theme.of(context).cardColor,
-                  child:
-                  ListView(
+                  height: 363,
+                  child: ListView(
                     scrollDirection: Axis.horizontal,
-                    shrinkWrap: true,
                     children: items.map((item) => Container(
                       width: 300,
-                      child: ShelfTile(item, users[item.uid], key: Key(item.toString()),),
+                      height: 275,
+                      child: FoodItemTile(item, users[item.uid], true, key: Key('${item.toString()}'),),
                     )).toList(),
                   )
               ),
             )
-
-                :
-
-            Padding(
-              padding: EdgeInsets.all(20),
-              // TODO: Change Text
-              child: Text('No Items.', style: Theme.of(context).textTheme.title.apply(color: Colors.grey),),
-            ),
           ]
-        );
-
+        ):Container();
   }
 
 

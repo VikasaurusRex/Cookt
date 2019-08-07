@@ -13,7 +13,7 @@ class _FavoritesState extends State<Favorites> {
   FoodItemList myList;
 
   void loadData() {
-    myList = FoodItemList.within(miles: 5, complete: (){
+    myList = FoodItemList.favoritesOf(userID: 'usercustomer', complete: (){
       setState(() {});
     });
   }

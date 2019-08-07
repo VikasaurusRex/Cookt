@@ -72,7 +72,7 @@ class _AddressState extends State<Address> {
   Widget _address(){
     return TextField(
       keyboardType: TextInputType.text,
-      maxLines: 2,
+      maxLines: 1,
       controller: addressController,
       onEditingComplete: (){
         Geocoder.local.findAddressesFromQuery(addressController.text).then((addresses){

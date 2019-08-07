@@ -13,7 +13,7 @@ class FoodItem {
   bool isHosting;
   List<String> likedBy;
   String name;
-  List<String> images;
+  String image;
   double price;
   DateTime timeCreated;
   DateTime timeUpdated;
@@ -49,7 +49,7 @@ class FoodItem {
         this.isHosting = false,
         this.likedBy = [],
         this.name = '',
-        this.images = [],
+        this.image = null,
         this.price = 0,
         this.timeCreated = DateTime.now(),
         this.timeUpdated = DateTime.now(),
@@ -73,7 +73,7 @@ class FoodItem {
         this.isHosting = map['isHosting'],
         this.likedBy = List<String>.from(map['likedBy']),
         this.name = map['name'],
-        this.images = List<String>.from(map['images']),
+        this.image = map['image'],
         this.price = map['price'].toDouble(),
         this.timeCreated = map['timeCreated'],
         this.timeUpdated = map['timeUpdated'],
@@ -92,7 +92,7 @@ class FoodItem {
     map['isHosting'] = isHosting;
     map['likedBy'] = likedBy;
     map['name'] = name;
-    map['images'] = images;
+    map['image'] = image;
     map['price'] = price;
     map['timeCreated'] = timeCreated;
     map['timeUpdated'] = timeUpdated;
@@ -119,7 +119,7 @@ class FoodItem {
     map['categories'] = categories;
     map['description'] = description;
     map['name'] = name;
-    map['images'] = images;
+    map['image'] = image;
     map['price'] = price;
     map['timeUpdated'] = DateTime.now();
 

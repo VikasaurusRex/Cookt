@@ -61,11 +61,16 @@ class _MyFoodItemsState extends State<MyFoodItems> {
 
   Widget _foodItemCell(FoodItem foodItem) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(5.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10.0,
+            )
+          ],
+          color: Theme.of(context).cardColor,
         ),
         child: FlatButton(
           //color: Colors.red,
@@ -83,10 +88,11 @@ class _MyFoodItemsState extends State<MyFoodItems> {
             padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
             child: Row(
               children: <Widget>[
-                ClipRRect(
-                  borderRadius: new BorderRadius.circular(2.0),
-                  child: foodItem.images.length > 0? Container(height: 75, width: 75, child: DatabaseIntegrator.foodImage(foodItem.images.first),) : Container(),
-                ),
+//                ClipRRect(
+//                  borderRadius: new BorderRadius.circular(2.0),
+//                  child:
+                  foodItem.image != null? Container(height: 75, width: 75, child: DatabaseIntegrator.foodImage(foodItem.image),) : Container(color: Colors.grey, child: Center(child: Icon(Icons.image),),),
+//                ),
                 Padding(padding: EdgeInsets.all(4.0),),
                 Text(foodItem.name, style: Theme.of(context).textTheme.subtitle.apply(fontSizeFactor: 1.2,),),
                 Expanded(

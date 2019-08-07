@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
 
+import 'package:cookt/models/DatabaseIntegrator.dart';
 import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'package:cookt/models/foodItems/Option.dart';
 
@@ -23,14 +24,10 @@ class EditFoodItem extends StatefulWidget {
 class _EditFoodItemState extends State<EditFoodItem> {
 
   //TODO: make categories different, more scrollier than bubblier
-  //TODO: Make Options on edit work
 
   // One TextEditingController for each form input:
   FoodItem editableItem = FoodItem.newItem();
-  List<Image> images = List();
-  Map<String, File> addedImages = Map(); // Stores where they were added
-  List<String> removedImages = List();
-
+  File addedImage;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -51,29 +48,13 @@ class _EditFoodItemState extends State<EditFoodItem> {
           descriptionController.text = editableItem.description;
           priceController.text = editableItem.price.toStringAsFixed(2);
         });
-        foodItem.images.forEach((ref){
-          FirebaseStorage.instance.ref().child("foodpics").child(
-              "$ref.png")
-              .getDownloadURL()
-              .then((imageUrl) {
-            Image image = Image.network(imageUrl.toString());
-            int index = foodItem.images.indexOf(ref);
-            setState(() {
-              if(index > images.length)
-                images.add(image);
-              else
-                images.insert(index, image);
-            });
-          });
-        });
+
         reference.collection('options').getDocuments().then((optionsSnapshots){
           optionsSnapshots.documents.forEach((snapshot){
             orderOptions.add(Option.fromSnapshot(snapshot));
           });
         });
       });
-
-
     }
 
   }
@@ -94,8 +75,8 @@ class _EditFoodItemState extends State<EditFoodItem> {
               Text('Name of Dish', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
               _foodName(),
               Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:  0.0), child:
-              Text('Images', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
-              _imagesScaffold(),
+              Text('Food Image', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
+              _image(),
               Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:  0.0), child:
               Text('Description', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
               _description(),
@@ -168,115 +149,22 @@ class _EditFoodItemState extends State<EditFoodItem> {
     );
   }
 
-  Widget _imagesScaffold(){
-    double spacing = 2.0;
-    return LayoutBuilder(builder: (content, constraints) {
-      Size size = Size(constraints.maxWidth, constraints.maxWidth);
-      return Center(
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: size.width,
-            maxHeight: size.height,
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Row(
-                  children: [
-                    _imageButton(0, flex: 2), // Largest Image
-                    Padding(padding: EdgeInsets.all(spacing),),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        children: [
-                          _imageButton(1), // Top Right
-                          Padding(padding: EdgeInsets.all(spacing),),
-                          _imageButton(2), // Mid Right
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(padding: EdgeInsets.all(spacing),),
-              Expanded(
-                flex: 1,
-                child: Row(
-                  children: [
-                    _imageButton(5), // Bottom Right
-                    Padding(padding: EdgeInsets.all(spacing),),
-                    _imageButton(4), // Mid Bottom
-                    Padding(padding: EdgeInsets.all(spacing),),
-                    _imageButton(3), // Left Bottom
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    });
-  }
-
-  Widget _imageButton(int index, {int flex = 1}) {
-    return Expanded(
-        flex: flex,
-        child: AspectRatio(
-          aspectRatio: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.grey,
-              image: DecorationImage(
-                fit: BoxFit.cover,
-                image: index<images.length?images[index].image:NetworkImage('http://www.vikramhegde.org/transparent.png'),
-              ),
-            ),
-            child: FlatButton(
-              onPressed: (){
-                imageTileTapped(index: index);
-              },
-              child: index<images.length?null:Icon(Icons.photo,color: Colors.black45,),
-            ),
-          ),
-        )
+  Widget _image() {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: FlatButton(
+        onPressed: getImage,
+        child: addedImage != null? Image.file(addedImage) : editableItem.image!=null? DatabaseIntegrator.foodImage(editableItem.image) : Container(color: Colors.grey, child: Icon(Icons.photo, color: Colors.black45,),),
+      ),
     );
   }
 
-  //TODO: Remove Images
-  void imageTileTapped({@required int index}) {
-    if(index<images.length){
-      _changeDeleteImage(index);
-      return;
-    }
-    getImage(index);
-  }
-
-  void getImage(int index) async {
+  void getImage() async {
     File image = await ImagePicker.pickImage(source: ImageSource.gallery);
-    String newImageName = randomAlphaNumeric(15);
     if(image != null) {
-      print('Changing at $index out of ${editableItem.images.length} total Images');
       setState(() {
-        if (index >= images.length){
-          images.add(Image.file(image));
-        }else {
-          images.removeAt(index);
-          images.insert(index, Image.file(image));
-        }
+        addedImage = image;
       });
-      if(index < editableItem.images.length) {
-        String imageName = editableItem.images.removeAt(index);
-        if(addedImages.keys.contains(imageName))
-          addedImages.remove(imageName);
-        else
-          removedImages.add(imageName);
-      }
-      editableItem.images.insert(index > editableItem.images.length ? editableItem.images.length : index, newImageName);
-      addedImages[newImageName] = image;
-      print('Editable Item Image Refs: ${editableItem.images}');
-      print('Added Images: ${addedImages.length}');
-      print('Removed Images: $removedImages');
     }
   }
 
@@ -635,6 +523,14 @@ class _EditFoodItemState extends State<EditFoodItem> {
       return;
     }
 
+    if (addedImage != null){
+      FirebaseStorage.instance.ref().child('foodpics').child(
+          '${editableItem.image}.png').delete();
+      editableItem.image = randomAlphaNumeric(10);
+      FirebaseStorage.instance.ref().child('foodpics').child(
+          '${editableItem.image}.png').putFile(addedImage);
+    }
+
     if(editableItem.reference == null) {
       Future<DocumentReference> ref = editableItem.create();
       editableItem.reference = await ref;
@@ -642,16 +538,6 @@ class _EditFoodItemState extends State<EditFoodItem> {
       print('Updating with a change');
       editableItem.updateListingWithData(editableItem.reference);
     }
-
-    removedImages.forEach((imageName){
-      FirebaseStorage.instance.ref().child('foodpics').child(
-          '${imageName}.png').delete();
-    });
-
-    addedImages.forEach((name, file){
-      FirebaseStorage.instance.ref().child('foodpics').child(
-          '$name.png').putFile(file);
-    });
 
     orderOptions.forEach((option) {
       if (option.reference != null) {
@@ -753,25 +639,13 @@ class _EditFoodItemState extends State<EditFoodItem> {
             FlatButton(
               child: Text('Delete'),
               onPressed: () {
-                //TODO: Remove an Image from Model
-                setState(() {
-                  images.removeAt(index);
-                });
-                String imageName = editableItem.images.removeAt(index);
-                if(addedImages.keys.contains(imageName))
-                  addedImages.remove(imageName);
-                else
-                  removedImages.add(imageName);
-                print('Editable Item Image Refs: ${editableItem.images}');
-                print('Added Images: ${addedImages.length}');
-                print('Removed Images: $removedImages');
-                Navigator.of(context).pop();
+                editableItem.image = null;
               },
             ),
             FlatButton(
               child: Text('Change'),
               onPressed: (){
-                getImage(index);
+                getImage();
                 Navigator.of(context).pop();
               },
             ),

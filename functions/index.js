@@ -46,10 +46,10 @@ exports.createCharge = functions.firestore.document('users/{userId}/charges/{cha
         try {
                                                         // TODO: context.params.userId
             const cardSnap = await firestore.collection('users').doc('usercustomer').get();
-            const customerId = cardSnap.data().custId;
-            const amount = cardSnap.data().amount;
-            const currency = cardSnap.data().currency;
-            const description = cardSnap.data().description;
+            const customer = cardSnap.data().custId;
+            const amount = chargeSnap.data().amount;
+            const currency = chargeSnap.data().currency;
+            const description = chargeSnap.data().description;
 
             const charge = {amount, currency, customer, description};
             const idempotentKey = context.params.chargeId;

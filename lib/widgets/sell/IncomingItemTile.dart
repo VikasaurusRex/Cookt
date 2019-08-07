@@ -51,7 +51,11 @@ class _IncomingItemTileState extends State<IncomingItemTile> {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.0),
       child: Container(
-        color: item.prepared?Colors.black45:Colors.transparent,
+        decoration: BoxDecoration(
+          color: item.prepared?Colors.black12:Colors.transparent,
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+       
         child: InkWell(
             child:Padding(
           padding: EdgeInsets.all(4.0),

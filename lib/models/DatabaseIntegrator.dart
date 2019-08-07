@@ -4,12 +4,32 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_database/firebase_database.dart';
 
+import 'package:cookt/models/foodItems/Review.dart';
+
 class DatabaseIntegrator{
+
+  static double rating(String uid) {
+    double ratingSum;
+    double totalRatings;
+    Firestore.instance.collection('fooddata').where('uid', isEqualTo: uid).getDocuments().then((foodItemQuery){
+      foodItemQuery.documents.forEach((foodItemSnap){
+        foodItemSnap.reference.collection('reviews').getDocuments().then((reviewQuery){
+          reviewQuery.documents.forEach((reviewSnap){
+            Review review = Review.fromSnapshot(reviewSnap);
+            ratingSum += review.rating;
+            totalRatings++;
+          });
+        });
+      });
+    });
+    return ratingSum/totalRatings;
+  }
 
   static Widget foodImage(String imageId) { // FoodItem
     if(imageId == null){
       return Container(
         color: Colors.grey,
+        child: Center(child:Icon(Icons.photo)),
       );
     }
     return FutureBuilder(
@@ -18,6 +38,7 @@ class DatabaseIntegrator{
           if(imageData.hasError || !imageData.hasData){
             return Container(
               color: Colors.grey,
+              child: Center(child:Icon(Icons.photo)),
             );
           }
           return Image.network(
@@ -76,6 +97,14 @@ class DatabaseIntegrator{
     );
   }
 
+  // TODO: Implement function to calculate whether user can or cannot order food item (if too far away)
+  static double milesBetween(){
+    // ~1 mile of lat and lon in degrees
+    double lat = 0.0144927536231884;
+    double lon = 0.0181818181818182;
+    return 0.0;
+  }
+
   static Future<String> nameAbbreviated(String uid) async { // Order, FoodItem
     DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(uid).get();
     if(!snapshot.exists || snapshot.data['kitchenname'] == null){
@@ -129,7 +158,7 @@ class DatabaseIntegrator{
     if(snapshot.value['cooktrate'] == null){
       return -1;
     }
-    return snapshot.value['cooktrate'].toDouble(); // TODO: Change from cookttake to cooktrate
+    return snapshot.value['cooktrate'].toDouble();
   }
   static Future<double> cooktConstant() async{ // Order
     DataSnapshot snapshot = await FirebaseDatabase.instance.reference().child('properties').once();
@@ -193,6 +222,10 @@ class DatabaseIntegrator{
     }
 
     return '$fullDate at ${date.hour%12==0?'12':date.hour%12}${date.minute==0? '': ':${date.minute}'} ${date.hour>11?'PM':'AM'}';
+  }
+
+  static String onlyTime(DateTime date){ // Order
+    return '${date.hour%12==0?'12':date.hour%12}${date.minute==0? '': ':${date.minute}'} ${date.hour>11?'PM':'AM'}';
   }
 
   static String dayOfTheWeek(int weekday){ // Order

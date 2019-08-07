@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stripe_payment/stripe_payment.dart';
@@ -8,11 +9,7 @@ import 'package:cookt/widgets/search/Search.dart';
 import 'package:cookt/widgets/orders/Orders.dart';
 import 'package:cookt/widgets/profile/Profile.dart';
 
-import 'package:cookt/widgets/profile/Favorites.dart';
-import 'package:cookt/widgets/profile/Payment.dart';
-import 'package:cookt/widgets/profile/HelpNewIssue.dart';
-import 'package:cookt/widgets/profile/Settings.dart';
-import 'package:cookt/widgets/profile/Address.dart';
+import 'widgets/personal/StoreOverview.dart';
 
 import 'package:cookt/models/DatabaseIntegrator.dart';
 
@@ -26,7 +23,26 @@ class MyApp extends StatelessWidget {
       title: "Cookt",
       home: Home(),
       theme: ThemeData(
-//        primarySwatch: Colors.red,
+//        primarySwatch:
+//        MaterialColor(
+//            0xff00ff00,
+//          {
+//            50: Color(0xffff0000),
+//            100: Color(0xffff0000), // <-----
+//            200: Color(0xff00ff00),
+//            300: Color(0xff00ff00),
+//            400: Color(0xff00ff00),
+//            500: Color(0xff00ff00),
+//            600: Color(0xff00ff00),
+//            700: Color(0xff0000ff), // <-----
+//            800: Color(0xff0000ff),
+//            900: Color(0xff0000ff),
+//          }
+//        ),
+        //accentColor: ,
+        //cardColor: Colors.greenAccent,
+        //disabledColor: ,
+        fontFamily: 'OpenSans',
         buttonTheme: ButtonThemeData(
           padding: EdgeInsets.all(0),
           layoutBehavior: ButtonBarLayoutBehavior.constrained,
@@ -46,10 +62,6 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   // TODO: Everything interactable made uppercase
-  // TODO: Play with fonts and colors
-  // TODO: font with lots of space around it. Kern better
-  // TODO: Seller bio's so that people humanize the chefs.
-  // TODO: Model after gofundme or kickstarter or spotify
 
   int _currentIndex = 0;
 

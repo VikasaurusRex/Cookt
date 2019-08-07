@@ -7,8 +7,13 @@ import 'FoodItemListView.dart';
 
 
 class Search extends StatefulWidget {
+  bool isSearching;
+  String searchFieldText;
+
+  Search({this.isSearching = false, this.searchFieldText = ''});
+
   @override
-  State<StatefulWidget> createState() =>_SearchState();
+  State<StatefulWidget> createState() =>_SearchState(isSearching: this.isSearching, searchFieldText: this.searchFieldText);
 }
 
 class _SearchState extends State<Search> {
@@ -17,7 +22,10 @@ class _SearchState extends State<Search> {
 
   FoodItemList myList;
 
-  _SearchState(){
+  _SearchState({this.isSearching = false, String searchFieldText = ''}){
+    if(searchFieldText != ''){
+      searchField.text = searchFieldText;
+    }
     myList = FoodItemList.within(miles: 5, complete: (){setState(() {});});
   }
 

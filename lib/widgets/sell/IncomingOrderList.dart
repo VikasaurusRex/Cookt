@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cookt/models/orders/Order.dart';
+import 'package:cookt/services/PaymentService.dart';
 import 'IncomingOrderTile.dart';
 
 class IncomingOrderList extends StatefulWidget {
@@ -83,7 +84,7 @@ class _IncomingOrderListState extends State<IncomingOrderList>  with AutomaticKe
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Are you sure you want to ${order.status == Status.accepted?'FINISH': 'accept'} the order?'),
+                Text('Are you sure you want to ${order.status == Status.accepted?'finish': 'accept'} the order?'),
               ],
             ),
           ),
@@ -91,7 +92,8 @@ class _IncomingOrderListState extends State<IncomingOrderList>  with AutomaticKe
             FlatButton(
               child: Text('Yes'),
               onPressed: () {
-                //TODO
+                if(order.status == Status.accepted)
+                  PaymentService().buyItem(order.totalPrice);
                 order.acceptFinishOrder();
                 setState(() {
                   orders.remove(order);
@@ -129,7 +131,6 @@ class _IncomingOrderListState extends State<IncomingOrderList>  with AutomaticKe
             FlatButton(
               child: Text('Yes'),
               onPressed: () {
-                //TODO
                 order.cancelOrder();
                 setState(() {
                   orders.remove(order);

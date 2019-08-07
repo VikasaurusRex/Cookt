@@ -7,6 +7,10 @@ class User {
   String firstname;
   String lastname;
   String kitchenname;
+  String about;
+  String because;
+  String favFood;
+  String hometown;
   String email;
   bool dineInAvailable;
   final bool verified;
@@ -24,6 +28,10 @@ class User {
         this.lastname = map['lastname'],
         this.email = map['email'],
         this.kitchenname = map['kitchenname'],
+        this.about = map['about'],
+        this.because = map['because'],
+        this.favFood = map['favFood'],
+        this.hometown = map['hometown'],
         this.verified = map['verified'],
         this.loc = map['loc'],
         this.custId = map['custId'];
@@ -37,6 +45,10 @@ class User {
         this.lastname = lastname,
         this.email = null,
         this.kitchenname = null,
+        this.about = null,
+        this.because = null,
+        this.favFood = null,
+        this.hometown = null,
         this.dineInAvailable = null,
         this.verified = null,
         this.loc = null,
@@ -52,6 +64,10 @@ class User {
     map['lastname'] = lastname;
     map['email'] = email;
     map['kitchenname'] = kitchenname;
+    map['about'] = kitchenname;
+    map['because'] = kitchenname;
+    map['favFood'] = kitchenname;
+    map['hometown'] = hometown;
     map['dineInAvailable'] = dineInAvailable;
     map['verified'] = verified;
     map['loc'] = loc;

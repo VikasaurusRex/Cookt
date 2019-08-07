@@ -6,11 +6,10 @@ import 'FoodItem.dart';
 
 class FoodItemList {
   List<FoodItem> items = [];
-  double miles;
   Map<String, User> users = Map();
   VoidCallback complete;
 
-  FoodItemList.within({this.miles, this.complete}){
+  FoodItemList.within({double miles, this.complete}){
     User.usersWithin(distance: miles).then((usersMap){
       users = usersMap;
       users.forEach((uid, user) {
@@ -28,6 +27,19 @@ class FoodItemList {
           complete();
         });
       });
+    });
+  }
+
+  // TODO: Copy similar structure all over
+  FoodItemList.favoritesOf({String userID, this.complete}){
+    Firestore.instance.collection('fooddata').where('likedBy', arrayContains: userID).getDocuments().then((querySnap){
+      items = querySnap.documents.map((doc) => FoodItem.fromSnapshot(doc)).toList();
+      querySnap.documents.map((doc){
+        Firestore.instance.collection('users').document(doc.data['uid']).get().then((userSnap){
+          users[userSnap.documentID] = User.fromSnapshot(userSnap);
+        });
+      }).toList();
+      complete();
     });
   }
 

@@ -15,6 +15,8 @@ import 'package:cookt/models/DatabaseIntegrator.dart';
 import 'package:cookt/models/User.dart';
 import 'ItemTile.dart';
 
+import 'package:cookt/widgets/personal/StoreOverview.dart';
+
 class OrderTile extends StatefulWidget {
   final Order order;
 
@@ -38,6 +40,7 @@ class OrderTile extends StatefulWidget {
 
 class _OrderTileState extends State<OrderTile> {
   final Order order;
+  User cook;
   List<Item> items = List();
 
   Map<String, String> _status =  Map();
@@ -64,6 +67,10 @@ class _OrderTileState extends State<OrderTile> {
     DatabaseIntegrator.kitchenName(order.cookID).then((val) => setState(() {
       _kitchenName = val;
     }));
+
+    Firestore.instance.collection('users').document(order.cookID).get().then((userSnap) => setState((){
+      cook = User.fromSnapshot(userSnap);
+    }));
   }
 
   void calculatePrice(){
@@ -86,8 +93,6 @@ class _OrderTileState extends State<OrderTile> {
     }else{
       order.deliveryPrice = 0;
     }
-
-    // TODO: Factor in cooktcontant and otherconstant
 
     price += (price*_stripeRate) + _stripeConstant;
 
@@ -263,12 +268,10 @@ class _OrderTileState extends State<OrderTile> {
       padding: EdgeInsets.all(8.0),
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(5.0),
           boxShadow: [
             new BoxShadow(
-              color: Colors.black45,
+              color: Colors.black12,
               offset: Offset(5.0, 5.0),
               blurRadius: 10.0,
             )
@@ -279,7 +282,18 @@ class _OrderTileState extends State<OrderTile> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              _kitchenImage(),
+              InkWell(
+                onTap:  cook == null? null:(){
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return StoreOverview(cook);
+                      },
+                    ),
+                  );
+                },
+                child: _kitchenImage(),
+              ),
               _statusLabel(),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -289,7 +303,7 @@ class _OrderTileState extends State<OrderTile> {
               Padding(
                 padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
                 child: Container(
-                  color: Colors.grey,
+                  color: Colors.black12,
                   height: 1.0,
                 ),
               ),
@@ -300,7 +314,7 @@ class _OrderTileState extends State<OrderTile> {
                 ),
               ),
               Container(
-                color: Colors.grey,
+                color: Colors.black12,
                 height: 1.0,
               ),
               Padding(
@@ -355,7 +369,7 @@ class _OrderTileState extends State<OrderTile> {
               ),
             ),
             order.status == Status.pending && order.active == true?InkWell(
-              child: Icon(Icons.delete),
+              child: Icon(Icons.delete, size: 30,),
               onTap: (){
                 widget.deleteOrder(order);
               },
@@ -388,7 +402,7 @@ class _OrderTileState extends State<OrderTile> {
           }:null,
           child: Container(
             decoration: BoxDecoration(
-              color: order.status == Status.pending && order.active == true?Color(0xFFCCFFCC):Theme.of(context).cardColor,
+              color: order.status == Status.pending && order.active == true?Theme.of(context).primaryColorLight:Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(5.0),
             ),
             child: Padding(padding: EdgeInsets.all(4),
@@ -407,15 +421,14 @@ class _OrderTileState extends State<OrderTile> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        //TODO: Implement proper pricing for cookt fee, total fee, and tax
         Text('Subtotal: \$${order.subtotalPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
         Text('Tax: \$${order.taxPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
         Text('Fees: \$${(order.cooktPrice + order.stripePrice).toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
-        Text('Delivery: \$${order.deliveryPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,),
+        order.deliveryPrice>0?Text('Delivery: \$${order.deliveryPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,textAlign: TextAlign.right,):Container(),
         Padding(padding: EdgeInsets.symmetric(vertical: 2.0),),
         Container(
           height: 1,
-          color: Colors.grey,
+          color: Colors.black12,
         ),
         Padding(padding: EdgeInsets.symmetric(vertical: 2.0),),
         Text('Total: \$${order.totalPrice.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead.apply(fontSizeFactor: 1.2, fontWeightDelta: 2),textAlign: TextAlign.right,),
@@ -426,13 +439,13 @@ class _OrderTileState extends State<OrderTile> {
   Widget _nextLineOptions(){
     if(order.status != Status.finished && order.active == false) {
       return RaisedButton(
-        color: Color(0xFFCCFFCC),
+        color: Theme.of(context).primaryColorLight,
         onPressed: (){
           widget.reorder(order);
         },
         child: Text(
           'Reorder',
-          style: Theme.of(context).textTheme.title.apply(color: Colors.green),
+          style: Theme.of(context).textTheme.title.apply(color: Theme.of(context).primaryColorDark),
         )
       );
     }
@@ -450,7 +463,7 @@ class _OrderTileState extends State<OrderTile> {
                   width: 50,
                   height: 30,
                   child: FlatButton(
-                    color: Color(0xFFEFEFEF),
+                    color: Theme.of(context).primaryColorLight,
                     onPressed: (){
                       changeOrderTime(increase: false);
                     },
@@ -468,7 +481,7 @@ class _OrderTileState extends State<OrderTile> {
                   width: 50,
                   height: 30,
                   child: FlatButton(
-                    color: Color(0xFFEFEFEF),
+                    color: Theme.of(context).primaryColorLight,
                     onPressed: (){
                       changeOrderTime(increase: true);
                     },
@@ -479,7 +492,7 @@ class _OrderTileState extends State<OrderTile> {
               ],
             ),
             RaisedButton(
-              color: Color(0xFFCCFFCC),
+              color: Theme.of(context).primaryColorLight,
               onPressed: (){
                 calculatePrice();
                 if(order.totalPrice >= 0 && _taxRate > 0 && (_cooktRate > 0 || _cooktConstant > 0) && (_stripeRate > 0 || _stripeConstant > 0) && ((order.orderType == OrderType.postmates && order.deliveryPrice > 0) || order.orderType != OrderType.postmates))
@@ -489,7 +502,7 @@ class _OrderTileState extends State<OrderTile> {
               },
               child: Text(
                 'Place Order',
-                style: Theme.of(context).textTheme.title.apply(color: Colors.green),
+                style: Theme.of(context).textTheme.title.apply(color: Theme.of(context).primaryColorDark),
               ),
             )
           ],
@@ -497,37 +510,37 @@ class _OrderTileState extends State<OrderTile> {
         break;
       case Status.requested:
         return RaisedButton(
-            color: Color(0xFFFFCCCC),
+            color: Theme.of(context).primaryColorLight,
           onPressed: (){
             widget.cancelOrder(order);
           },
           child: Text(
             'Cancel',
-            style: Theme.of(context).textTheme.title.apply(color: Colors.red),
+            style: Theme.of(context).textTheme.title.apply(color: Theme.of(context).primaryColorDark),
           )
         );
         break;
       case Status.accepted:
         return RaisedButton(
-            color: Color(0xFFFFCCCC),
+            color: Theme.of(context).primaryColorLight,
             onPressed: (){
               widget.cancelOrder(order);
             },
             child: Text(
               'Cancel (Possible Fee)',
-              style: Theme.of(context).textTheme.title.apply(color: Colors.red),
+              style: Theme.of(context).textTheme.title.apply(color: Theme.of(context).primaryColorDark),
             )
         );
         break;
       case Status.finished:
         return RaisedButton(
-            color: Color(0xFFCCFFCC),
+            color: Theme.of(context).primaryColorLight,
             onPressed: (){
               widget.reorder(order);
             },
             child: Text(
               'Reorder',
-              style: Theme.of(context).textTheme.title.apply(color: Colors.green),
+              style: Theme.of(context).textTheme.title.apply(color: Theme.of(context).primaryColorDark),
             )
         );
         break;

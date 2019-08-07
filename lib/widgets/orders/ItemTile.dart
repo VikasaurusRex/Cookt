@@ -120,7 +120,7 @@ class _ItemTileState extends State<ItemTile> {
                         .title,),
                   ),
                   widget.allowModification ? InkWell(
-                    child: Icon(Icons.delete),
+                    child: Icon(Icons.cancel),
                     onTap: () {
                       _confirmDelete();
                     }, //widget.deleteItem(item),
@@ -182,8 +182,6 @@ class _ItemTileState extends State<ItemTile> {
 
 
 }
-
-// TODO: Delete Items if a user doesnt want it anymore rather than deleting whole order.
 
 class SelectionTile extends StatelessWidget {
   final Selection selection;

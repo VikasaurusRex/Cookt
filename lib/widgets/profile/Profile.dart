@@ -51,10 +51,10 @@ class _ProfileState extends State<Profile> {
                 Container(
                   width: 100,
                   height: 100,
-                  child: ClipRRect(
-                    borderRadius: new BorderRadius.circular(10),
+                  //child: ClipRRect(
+                    //borderRadius: new BorderRadius.circular(10),
                     child: DatabaseIntegrator.userImage('usercook'),
-                  ),
+                  //),
                 ),
                 Expanded(
                   child: Container(),
