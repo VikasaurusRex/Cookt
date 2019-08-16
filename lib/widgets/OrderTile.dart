@@ -11,8 +11,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cookt/models/orders/Order.dart';
 import 'package:cookt/models/orders/Item.dart';
-import 'package:cookt/models/DatabaseIntegrator.dart';
-import 'package:cookt/models/User.dart';
+import 'package:cookt/services/Services.dart';
+import 'package:cookt/models/user/User.dart';
 import 'ItemTile.dart';
 
 import 'package:cookt/widgets/personal/StoreOverview.dart';
@@ -64,7 +64,7 @@ class _OrderTileState extends State<OrderTile> {
   LatLng cookCoords = null;
 
   void loadData(){
-    DatabaseIntegrator.kitchenName(order.cookID).then((val) => setState(() {
+    Services.kitchenName(order.cookID).then((val) => setState(() {
       _kitchenName = val;
     }));
 
@@ -186,27 +186,27 @@ class _OrderTileState extends State<OrderTile> {
   }
 
   void refresh(){
-    DatabaseIntegrator.cooktRate().then((val) => setState(() {
+    Services.cooktRate().then((val) => setState(() {
       _cooktRate = val;
       calculatePrice();
     }));
 
-    DatabaseIntegrator.cooktConstant().then((val) => setState(() {
+    Services.cooktConstant().then((val) => setState(() {
       _cooktConstant = val;
       calculatePrice();
     }));
 
-    DatabaseIntegrator.stripeRate().then((val) => setState(() {
+    Services.stripeRate().then((val) => setState(() {
       _stripeRate = val;
       calculatePrice();
     }));
 
-    DatabaseIntegrator.otherConstant().then((val) => setState(() {
+    Services.otherConstant().then((val) => setState(() {
       _stripeConstant = val;
       calculatePrice();
     }));
 
-    DatabaseIntegrator.dineInAvailable(order.cookID).then((val) => setState(() {
+    Services.dineInAvailable(order.cookID).then((val) => setState(() {
       if(val){
         availableOrderTypeLabels.add('Dine In');
         availableOrderTypes.add(OrderType.dineIn);
@@ -238,14 +238,14 @@ class _OrderTileState extends State<OrderTile> {
     _time[Status.pending] = 'Select a time below to order';
     _time[Status.requested] = 'Your order has been sent for confirmation.';
     if(order.orderType == OrderType.pickup){
-      _time[Status.accepted] = 'Ready for pickup at ${DatabaseIntegrator.simplifiedDate(order.pickupTime.toLocal())}';
+      _time[Status.accepted] = 'Ready for pickup at ${Services.simplifiedDate(order.pickupTime.toLocal())}';
     }else if(order.orderType == OrderType.dineIn){
-      _time[Status.accepted] = 'Reservation at ${DatabaseIntegrator.simplifiedDate(order.pickupTime.toLocal())}';
+      _time[Status.accepted] = 'Reservation at ${Services.simplifiedDate(order.pickupTime.toLocal())}';
     }else{
-      _time[Status.accepted] = 'Order will be delivered at ${DatabaseIntegrator.simplifiedDate(order.pickupTime.toLocal())}';
+      _time[Status.accepted] = 'Order will be delivered at ${Services.simplifiedDate(order.pickupTime.toLocal())}';
     }
-    _time['CANCELLED'] = 'Order was cancelled at ${DatabaseIntegrator.simplifiedDate(order.lastTouchedTime.toLocal())}';
-    _time[Status.finished] = '${DatabaseIntegrator.simplifiedDate(order.lastTouchedTime.toLocal())}';
+    _time['CANCELLED'] = 'Order was cancelled at ${Services.simplifiedDate(order.lastTouchedTime.toLocal())}';
+    _time[Status.finished] = '${Services.simplifiedDate(order.lastTouchedTime.toLocal())}';
 
     order.reference.collection('items').snapshots().forEach((querySnapshot){
       querySnapshot.documents.forEach((snapshot){
@@ -336,7 +336,7 @@ class _OrderTileState extends State<OrderTile> {
             alignment: AlignmentDirectional.center,
             fit: StackFit.expand,
             children: <Widget>[
-              DatabaseIntegrator.storefrontImage(order.cookID),
+              Services.storefrontImage(order.cookID),
               Center(
 //                child: BackdropFilter(
 //                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -473,7 +473,7 @@ class _OrderTileState extends State<OrderTile> {
                 Expanded(
                   child: Center(
                     child: Text(
-                      '${order.pickupTime.day == DateTime.now().day? 'Today':DatabaseIntegrator.dayOfTheWeek(order.pickupTime.weekday)} ${order.pickupTime.hour>12?order.pickupTime.hour-12:order.pickupTime.hour==0?12:order.pickupTime.hour}:${order.pickupTime.minute==0?'00':'30'} ${order.pickupTime.hour>=12?'PM':'AM'}',
+                      '${order.pickupTime.day == DateTime.now().day? 'Today':Services.dayOfTheWeek(order.pickupTime.weekday)} ${order.pickupTime.hour>12?order.pickupTime.hour-12:order.pickupTime.hour==0?12:order.pickupTime.hour}:${order.pickupTime.minute==0?'00':'30'} ${order.pickupTime.hour>=12?'PM':'AM'}',
                       style: Theme.of(context).textTheme.title,),
                   ),
                 ),

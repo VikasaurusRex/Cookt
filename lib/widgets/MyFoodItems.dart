@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cookt/models/foodItems/FoodItem.dart';
-import 'package:cookt/models/DatabaseIntegrator.dart';
+import 'package:cookt/services/Services.dart';
 import 'EditFoodItem.dart';
 
 class MyFoodItems extends StatefulWidget {
@@ -91,7 +91,7 @@ class _MyFoodItemsState extends State<MyFoodItems> {
 //                ClipRRect(
 //                  borderRadius: new BorderRadius.circular(2.0),
 //                  child:
-                  foodItem.image != null? Container(height: 75, width: 75, child: DatabaseIntegrator.foodImage(foodItem.image),) : Container(color: Colors.grey, child: Center(child: Icon(Icons.image),),),
+                  foodItem.image != null? Container(height: 75, width: 75, child: Services.foodImage(foodItem.image),) : Container(color: Colors.grey, child: Center(child: Icon(Icons.image),),),
 //                ),
                 Padding(padding: EdgeInsets.all(4.0),),
                 Text(foodItem.name, style: Theme.of(context).textTheme.subtitle.apply(fontSizeFactor: 1.2,),),

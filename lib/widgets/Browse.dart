@@ -69,7 +69,7 @@ class _BrowseState extends State<Browse> {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 20),
-          child: Text('Favorites', style: Theme.of(context).textTheme.title.apply(fontWeightDelta: 1, fontSizeFactor: 1.5),),
+          child: Text('Favorites', style: Theme.of(context).textTheme.title.apply(fontWeightDelta: 1, fontSizeFactor: 1.5, color: Theme.of(context).primaryColorDark),),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,7 +77,7 @@ class _BrowseState extends State<Browse> {
         ),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 20),
-          child: Text('More Options', style: Theme.of(context).textTheme.title.apply(fontWeightDelta: 1, fontSizeFactor: 1.5),),
+          child: Text('More Options', style: Theme.of(context).textTheme.title.apply(fontWeightDelta: 1, fontSizeFactor: 1.5, color: Theme.of(context).primaryColorDark),),
         ),
         FoodItemListView(myList.items, myList.users, key: Key('ALL_REST')),
       ],

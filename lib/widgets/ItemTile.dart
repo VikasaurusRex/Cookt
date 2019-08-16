@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:cookt/models/orders/Item.dart';
-import 'package:cookt/models/DatabaseIntegrator.dart';
+import 'package:cookt/services/Services.dart';
 import 'package:cookt/models/orders/Selection.dart';
 
 class ItemTile extends StatefulWidget {
@@ -24,7 +24,7 @@ class _ItemTileState extends State<ItemTile> {
   List<Selection> selections = List();
 
   void loadData(){
-    DatabaseIntegrator.foodName(item.foodID).then((val){
+    Services.foodName(item.foodID).then((val){
       setState(() {
         _itemName = val;
       });
@@ -64,7 +64,7 @@ class _ItemTileState extends State<ItemTile> {
                 children: <Widget>[
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
+                      border: Border.all(color: Theme.of(context).primaryColorLight),
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                     child: Row(
@@ -87,7 +87,9 @@ class _ItemTileState extends State<ItemTile> {
                             child: Text('${item.quantity.toString()}', style: Theme
                                 .of(context)
                                 .textTheme
-                                .subhead,),
+                                .subhead.apply(
+                              color: Theme.of(context).primaryColorDark
+                            ),),
                           ),
                           widget.allowModification? InkWell(
                             child: Icon(Icons.add),
@@ -107,7 +109,7 @@ class _ItemTileState extends State<ItemTile> {
                       child: Text('${_itemName}${item.quantity>1?'s':''}', style: Theme
                           .of(context)
                           .textTheme
-                          .title,),
+                          .title.apply(fontWeightDelta: 1),),
                       //${item.quantity>1?'(${item.quantity}x @ ${(item.price).toStringAsFixed(2)})':''}
                     ),
                   ),
@@ -194,11 +196,33 @@ class SelectionTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('${selection.title}:', style: Theme.of(context).textTheme.subtitle.apply(fontSizeFactor: 1.05, fontWeightDelta: 2),),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: selection.selections.map((selection) => Text('$selection', style: Theme.of(context).textTheme.subtitle,)).toList(),
-          )
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 4),
+            child: Text('${selection.title}:', style: Theme.of(context).textTheme.subtitle.apply(),),
+          ),
+          Container(
+            height: 25,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: selection.selections.map((selection) =>
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                  child: Row(
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                        child: Icon(Icons.brightness_1, size: 5,)
+                      ),
+                      Text(
+                        '$selection',
+                        style: Theme.of(context).textTheme.subtitle,
+                      ),
+                    ],
+                  ),
+                ),
+              ).toList(),
+            ),
+          ),
         ],
       )
     );

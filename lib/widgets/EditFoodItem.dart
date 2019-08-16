@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
 
-import 'package:cookt/models/DatabaseIntegrator.dart';
+import 'package:cookt/services/Services.dart';
 import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'package:cookt/models/foodItems/Option.dart';
 
@@ -50,8 +50,10 @@ class _EditFoodItemState extends State<EditFoodItem> {
         });
 
         reference.collection('options').getDocuments().then((optionsSnapshots){
-          optionsSnapshots.documents.forEach((snapshot){
-            orderOptions.add(Option.fromSnapshot(snapshot));
+          setState(() {
+            optionsSnapshots.documents.forEach((snapshot){
+              orderOptions.add(Option.fromSnapshot(snapshot));
+            });
           });
         });
       });
@@ -71,52 +73,87 @@ class _EditFoodItemState extends State<EditFoodItem> {
           ),
           child: ListView(
             children: [
-              Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:  0.0), child:
-              Text('Name of Dish', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
+              _sectionTitle('Name of Dish'),
               _foodName(),
-              Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:  0.0), child:
-              Text('Food Image', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
+              _sectionTitle('Food Image'),
               _image(),
-              Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:  0.0), child:
-              Text('Description', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
+              _sectionTitle('Description'),
               _description(),
-              Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:  0.0), child:
-              Text('Category', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
-              _categories(),
-              Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:  0.0), child:
-              Text('Base Price', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
+              _sectionTitle('Base Price'),
               _price(),
-              Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:  0.0), child:
-              Text('Options', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5),),),
+              _sectionTitle('Options'),
               Column(
                 children: orderOptions.map((option) => _singleOptionView(option)).toList(),
               ),
-              Container(
-                height: 35.0,
-                child: FloatingActionButton(
-                  tooltip: 'Add an Option',
-                  onPressed: (){
-                    setState(() {
-                      Option option = Option.newOption();
-                      orderOptions.add(option);
-                      _editOption(option);
-                    });
-                  },
-                  child: Icon(Icons.add),
+              FlatButton(
+                onPressed: (){
+                  setState(() {
+                    Option option = Option.newOption();
+                    orderOptions.add(option);
+                    _editOption(option);
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        offset: Offset(2, 2),
+                        blurRadius: 5.0,
+                      )
+                    ],
+                    color: Theme.of(context).primaryColorLight,
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(6.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Icon(Icons.add, size: 20, color: Theme.of(context).primaryColorDark,)
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Text('Add Option', style: TextStyle(fontSize: 16, color: Theme.of(context).primaryColorDark),),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
+              _sectionTitle('Category'),
+              _categories(),
               Padding(padding: EdgeInsets.all(20.0),),
               Container(
                 height: 60.0,
                 child: RaisedButton(
                   onPressed: createFoodItem,
-                  color: Theme.of(context).cardColor,
-                  child: Text(widget.reference==null?"Create Food Item":"Save Edits"),
+                  color: Theme.of(context).primaryColorLight,
+                  child: Text(
+                    widget.reference==null?"Create Food Item":"Save Edits",
+                    style: Theme.of(context).textTheme.subhead.apply(
+                      color: Theme.of(context).primaryColorDark,
+                      fontSizeFactor: 1.2
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String text){
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:  0.0),
+      child: Text(
+        '$text',
+        style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5, color: Theme.of(context).primaryColorDark),
       ),
     );
   }
@@ -150,12 +187,12 @@ class _EditFoodItemState extends State<EditFoodItem> {
   }
 
   Widget _image() {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: FlatButton(
-        onPressed: getImage,
-        child: addedImage != null? Image.file(addedImage) : editableItem.image!=null? DatabaseIntegrator.foodImage(editableItem.image) : Container(color: Colors.grey, child: Icon(Icons.photo, color: Colors.black45,),),
-      ),
+    return FlatButton(
+      onPressed: getImage,
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: addedImage != null? Image.file(addedImage, fit: BoxFit.cover,) : editableItem.image!=null? Services.foodImage(editableItem.image) : Container(color: Colors.grey, child: Icon(Icons.photo, color: Colors.black45,),),
+      )
     );
   }
 
@@ -217,58 +254,45 @@ class _EditFoodItemState extends State<EditFoodItem> {
   }
 
   Widget _categories(){
-    bool leftCol = false;
-    List<Widget> left = [];
-    List<Widget> right = [];
-
-    for(String name in FoodItem.allCategories){
-      Widget button = Container(
-        height: 50.0,
-        child: FlatButton(
-          onPressed: (){
-            if(editableItem.categories.contains(name)){
-              editableItem.categories.remove(name);
-            }else{
-              editableItem.categories.add(name);
-            }
-            print(editableItem.categories);
-            setState((){});
-            setState((){});
-          },
-          splashColor: editableItem.categories.contains(name)?Theme.of(context).splashColor:Colors.greenAccent,
-          child: Text(
-            '$name',
-            style: Theme.of(context).textTheme.subhead.apply(
-              color: editableItem.categories.contains(name)?Colors.green:Theme.of(context).textTheme.subhead.color,
-              fontWeightDelta: editableItem.categories.contains(name)?2:0,
-            ),
-          ),
-        ),
-      );
-      if(leftCol){
-        left.add(button);
-      }else{
-        right.add(button);
-      }
-      leftCol = !leftCol;
-    }
-
     return Container(
-      child: Row(
-        children: <Widget>[
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: left,
+      height: 60,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: FoodItem.allCategories.map((name) =>
+          Padding(
+            padding: EdgeInsets.all(2.0),
+            child: Padding(
+              padding: EdgeInsets.all(editableItem.categories.contains(name)? 0:2),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: editableItem.categories.contains(name)? Theme.of(context).primaryColor : Colors.black26,
+                    width: editableItem.categories.contains(name)? 4:2,
+                  ),
+                  color: editableItem.categories.contains(name)? Theme.of(context).primaryColorLight:Colors.transparent,
+                ),
+                child: FlatButton(
+                  onPressed: (){
+                    if(editableItem.categories.contains(name)){
+                      editableItem.categories.remove(name);
+                    }else{
+                      editableItem.categories.add(name);
+                    }
+                    print(editableItem.categories);
+                    setState((){});
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                        '$name',
+                        style: Theme.of(context).textTheme.subhead
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: right,
-            ),
-          ),
-        ],
+        ).toList(),
       ),
     );
   }
@@ -338,168 +362,170 @@ class _EditFoodItemState extends State<EditFoodItem> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Edit Option'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: optionTitleController,
-                style: Theme.of(context).textTheme.subhead.apply(fontSizeFactor: 1.2, fontWeightDelta: 2),
-                onSubmitted: (text){
-                  option.title = text;
-                  setState(() {
-                    optionTitleController.text = text;
-                  });
-                },
-                onChanged: (text){
-                  option.title = text;
-                  setState(() {
-                    optionTitleController.text = text;
-                  });
-                },
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 0),
-                  icon: Icon(Icons.title),
-
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 4.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Expanded(
-                      child: Text('Maximum Selections: ', style: Theme.of(context).textTheme.subhead),
-                    ),
-                    InkWell(
-                      onTap: (){
-                        setState(() {
-                          option.maxSelection = option.maxSelection > 2? option.maxSelection - 1: 1;
-                          Navigator.of(context).pop();
-                          _editOption(option);
-                        });
-                      },
-                      child: Icon(Icons.remove),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(option.maxSelection.toString(), style: Theme.of(context).textTheme.subhead),
-                    ),
-                    InkWell(
-                      onTap: (){
-                        setState(() {
-                          option.maxSelection = option.maxSelection < option.options.length ? option.maxSelection + 1: option.options.length;
-                          Navigator.of(context).pop();
-                          _editOption(option);
-                        });
-                      },
-                      child: Icon(Icons.add),
-                    )
-                  ],
-                ),
-              ),
-              Container(
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Container(
-                    width: 200,
-                    height: 165,
-                    child: ListView.builder(
-                      itemCount: option.options.length,
-                      itemBuilder: (BuildContext buildContext, int i) => Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Container(
-                            width: 100,
-                            height: 35,
-                            child: TextField(
-                              controller: optionsControllers[i],
-                              onSubmitted: (text){
-                                setState(() {
-                                  optionsControllers[i].text = text;
-                                  option.options[i] = text;
-                                });
-                              },
-                              onChanged: (text){
-                                setState(() {
-                                  optionsControllers[i].text = text;
-                                  option.options[i] = text;
-                                });
-                              },
-                              decoration: InputDecoration(
-                                labelText: null,
-                                contentPadding: EdgeInsets.all(4.0),
-                                border: UnderlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                          Padding(padding: EdgeInsets.symmetric(horizontal: 4.0),),
-                          Container(
-                            width: 50,
-                            height: 35,
-                            child: TextField(
-                              keyboardType: TextInputType.numberWithOptions(signed: true, decimal: true),
-                              controller: priceControllers[i],
-                              onSubmitted: (text){
-                                setState(() {
-                                  option.price[i] = isNum(text)? double.parse(double.parse(text).toStringAsFixed(2)):0.0;
-                                  priceControllers[i].text = isNum(text)?double.parse(text).toStringAsFixed(2):'0.00';
-                                });
-                              },
-                              onChanged:  (text){
-                                setState(() {
-                                  option.price[i] = isNum(text)? double.parse(double.parse(text).toStringAsFixed(2)):0.0;
-                                  //TODO: Delete comment
-                                  //priceControllers[i].text = isNum(text)?double.parse(text).toStringAsFixed(2):'0.00';
-                                });
-                              },
-                              decoration: InputDecoration(
-                                labelText: null,
-                                contentPadding: EdgeInsets.all(4.0),
-                                border: UnderlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                          Padding(padding: EdgeInsets.symmetric(horizontal: 4.0),),
-                          InkWell(
-                            onTap: (){
-                              setState(() {
-                                if(option.options.length == 1){
-                                  Navigator.of(context).pop();
-                                  _deleteOption(option);
-                                  return;
-                                }
-                                option.options.removeAt(i);
-                                option.price.removeAt(i);
-                                option.maxSelection = option.maxSelection > option.options.length? option.options.length: option.maxSelection;
-                                Navigator.of(context).pop();
-                                _editOption(option);
-                              });
-                            },
-                            child: Icon(Icons.delete),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              ),
-              Container(
-                height: 35.0,
-                child: FloatingActionButton(
-                  tooltip: 'Add an Option',
-                  onPressed: (){
+          content: Container(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                TextField(
+                  controller: optionTitleController,
+                  style: Theme.of(context).textTheme.subhead.apply(fontSizeFactor: 1.2, fontWeightDelta: 2),
+                  onSubmitted: (text){
+                    option.title = text;
                     setState(() {
-                      option.options.add('New Option');
-                      option.price.add(0.0);
-                      option.maxSelection++;
-                      Navigator.of(context).pop();
-                      _editOption(option);
+                      optionTitleController.text = text;
                     });
                   },
-                  child: Icon(Icons.add),
+                  onChanged: (text){
+                    option.title = text;
+                    setState(() {
+                      optionTitleController.text = text;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 0),
+                    icon: Icon(Icons.title),
+
+                  ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Expanded(
+                        child: Text('Maximum Selections: ', style: Theme.of(context).textTheme.subhead),
+                      ),
+                      InkWell(
+                        onTap: (){
+                          setState(() {
+                            option.maxSelection = option.maxSelection > 2? option.maxSelection - 1: 1;
+                            Navigator.of(context).pop();
+                            _editOption(option);
+                          });
+                        },
+                        child: Icon(Icons.remove),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(option.maxSelection.toString(), style: Theme.of(context).textTheme.subhead),
+                      ),
+                      InkWell(
+                        onTap: (){
+                          setState(() {
+                            option.maxSelection = option.maxSelection < option.options.length ? option.maxSelection + 1: option.options.length;
+                            Navigator.of(context).pop();
+                            _editOption(option);
+                          });
+                        },
+                        child: Icon(Icons.add),
+                      )
+                    ],
+                  ),
+                ),
+                Container(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Container(
+                        width: 200,
+                        height: 165,
+                        child: ListView.builder(
+                          itemCount: option.options.length,
+                          itemBuilder: (BuildContext buildContext, int i) => Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Container(
+                                width: 100,
+                                height: 35,
+                                child: TextField(
+                                  controller: optionsControllers[i],
+                                  onSubmitted: (text){
+                                    setState(() {
+                                      optionsControllers[i].text = text;
+                                      option.options[i] = text;
+                                    });
+                                  },
+                                  onChanged: (text){
+                                    setState(() {
+                                      optionsControllers[i].text = text;
+                                      option.options[i] = text;
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    labelText: null,
+                                    contentPadding: EdgeInsets.all(4.0),
+                                    border: UnderlineInputBorder(),
+                                  ),
+                                ),
+                              ),
+                              Padding(padding: EdgeInsets.symmetric(horizontal: 4.0),),
+                              Container(
+                                width: 50,
+                                height: 35,
+                                child: TextField(
+                                  keyboardType: TextInputType.numberWithOptions(signed: true, decimal: true),
+                                  controller: priceControllers[i],
+                                  onSubmitted: (text){
+                                    setState(() {
+                                      option.price[i] = isNum(text)? double.parse(double.parse(text).toStringAsFixed(2)):0.0;
+                                      priceControllers[i].text = isNum(text)?double.parse(text).toStringAsFixed(2):'0.00';
+                                    });
+                                  },
+                                  onChanged:  (text){
+                                    setState(() {
+                                      option.price[i] = isNum(text)? double.parse(double.parse(text).toStringAsFixed(2)):0.0;
+                                      //TODO: Delete comment
+                                      //priceControllers[i].text = isNum(text)?double.parse(text).toStringAsFixed(2):'0.00';
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    labelText: null,
+                                    contentPadding: EdgeInsets.all(4.0),
+                                    border: UnderlineInputBorder(),
+                                  ),
+                                ),
+                              ),
+                              Padding(padding: EdgeInsets.symmetric(horizontal: 4.0),),
+                              InkWell(
+                                onTap: (){
+                                  setState(() {
+                                    if(option.options.length == 1){
+                                      Navigator.of(context).pop();
+                                      _deleteOption(option);
+                                      return;
+                                    }
+                                    option.options.removeAt(i);
+                                    option.price.removeAt(i);
+                                    option.maxSelection = option.maxSelection > option.options.length? option.options.length: option.maxSelection;
+                                    Navigator.of(context).pop();
+                                    _editOption(option);
+                                  });
+                                },
+                                child: Icon(Icons.delete),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                ),
+                Container(
+                  height: 35.0,
+                  child: FloatingActionButton(
+                    tooltip: 'Add an Option',
+                    onPressed: (){
+                      setState(() {
+                        option.options.add('New Option');
+                        option.price.add(0.0);
+                        option.maxSelection++;
+                        Navigator.of(context).pop();
+                        _editOption(option);
+                      });
+                    },
+                    child: Icon(Icons.add),
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: <Widget>[
             FlatButton(
@@ -535,7 +561,6 @@ class _EditFoodItemState extends State<EditFoodItem> {
       Future<DocumentReference> ref = editableItem.create();
       editableItem.reference = await ref;
     } else {
-      print('Updating with a change');
       editableItem.updateListingWithData(editableItem.reference);
     }
 

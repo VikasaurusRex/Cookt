@@ -19,6 +19,8 @@ class User {
 
   DocumentReference reference;
 
+
+
   User.fromMap(Map<String, dynamic> map, {@required this.reference})
       :
         assert(map['firstname'] != null),
@@ -43,7 +45,7 @@ class User {
       :
         this.firstname = firstname,
         this.lastname = lastname,
-        this.email = null,
+        this.email = email,
         this.kitchenname = null,
         this.about = null,
         this.because = null,

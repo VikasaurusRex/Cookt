@@ -21,10 +21,8 @@ class _ReviewListState extends State<ReviewList> {
     Padding(
       padding: EdgeInsets.all(8.0),
       child: Container(
-          height: 100.0,
+          height: 60.0,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(5.0),
           ),
           child: Center(
               child: Text('No Reviews Yet.', style: Theme.of(context).textTheme.subhead,)
@@ -32,11 +30,8 @@ class _ReviewListState extends State<ReviewList> {
       ),
     )
         :
-    Container(
-      height: 250,
-      child: ListView(
-        children: widget.reviews.map((review) => ReviewTile(review)).toList(),
-      ),
+    Column(
+      children: widget.reviews.map((review) => ReviewTile(review)).toList(),
     );
   }
 }

@@ -4,8 +4,8 @@ import 'package:geocoder/geocoder.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'package:cookt/models/User.dart';
-import 'package:cookt/models/DatabaseIntegrator.dart';
+import 'package:cookt/models/user/User.dart';
+import 'package:cookt/services/Services.dart';
 
 class Address extends StatefulWidget {
   @override
@@ -20,7 +20,7 @@ class _AddressState extends State<Address> {
   Marker cookPosition;
 
   _AddressState(){
-    DatabaseIntegrator.loc('usercook').then((val) => setState(() {
+    Services.loc('usercook').then((val) => setState(() {
       cookCoords = LatLng(val.latitude, val.longitude);
       updateMap();
     }));

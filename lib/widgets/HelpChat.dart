@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:cookt/models/DatabaseIntegrator.dart';
+import 'package:cookt/services/Services.dart';
 import 'package:cookt/models/help/Conversation.dart';
 import 'package:cookt/models/help/Message.dart';
 

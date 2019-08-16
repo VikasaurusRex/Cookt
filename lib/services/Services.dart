@@ -5,8 +5,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 import 'package:cookt/models/foodItems/Review.dart';
+import 'package:cookt/models/User.dart';
 
-class DatabaseIntegrator{
+class Services{
 
   static double rating(String uid) {
     double ratingSum;
@@ -105,9 +106,17 @@ class DatabaseIntegrator{
     return 0.0;
   }
 
+  static Future<User> userWithUid(String uid) async { // Order, FoodItem
+    DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(uid).get();
+    if(!snapshot.exists){
+      return null;
+    }
+    return User.fromSnapshot(snapshot);
+  }
+
   static Future<String> nameAbbreviated(String uid) async { // Order, FoodItem
     DocumentSnapshot snapshot = await Firestore.instance.collection('users').document(uid).get();
-    if(!snapshot.exists || snapshot.data['kitchenname'] == null){
+    if(!snapshot.exists){
       return 'No Name';
     }
     return '${snapshot.data['firstname']} ${snapshot.data['lastname'].toString().substring(0,1)}.';

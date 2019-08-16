@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'package:cookt/models/foodItems/Option.dart';
@@ -13,8 +10,8 @@ import 'package:cookt/models/foodItems/Review.dart';
 import 'package:cookt/models/orders/Selection.dart';
 import 'package:cookt/models/orders/Order.dart';
 import 'package:cookt/models/orders/Item.dart';
-import 'package:cookt/models/DatabaseIntegrator.dart';
-import 'package:cookt/models/User.dart';
+import 'package:cookt/services/Services.dart';
+import 'package:cookt/models/user/User.dart';
 
 import 'package:cookt/widgets/search/CategoryTile.dart';
 import 'package:cookt/widgets/search/Search.dart';
@@ -59,15 +56,7 @@ class _FoodItemViewState extends State<FoodItemView> {
   TextEditingController reviewController = TextEditingController();
   int myRating = 0;
 
-  GoogleMapController mapController;
-
-  LatLng myCoords = null;
-  LatLng cookCoords = null;
-
   _FoodItemViewState(DocumentReference reference){
-
-    scroller = ScrollController();
-    scroller.addListener(updateMap);
 
 
     if(reference!=null){
@@ -80,7 +69,6 @@ class _FoodItemViewState extends State<FoodItemView> {
           loadReviews(reference);
           checkIfOrdered();
           canOrder = checkIfAvailable();
-          loadLocation();
 
           price = foodItem.price;
 
@@ -96,28 +84,32 @@ class _FoodItemViewState extends State<FoodItemView> {
 
   @override
   Widget build(BuildContext context) {
-    updateMap();
     return Scaffold(
       appBar: AppBar(title: Text(foodItem.name),),
       body: ListView(
           shrinkWrap: true,
-          controller: scroller,
           children: [
             _foodImage(),
             Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black38),
-                  borderRadius: BorderRadius.circular(5.0)
-                ),
-                child: _storeOverviewTile(),
+              padding: EdgeInsets.fromLTRB(8, 20, 8, 0),
+              child: _description(),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                _rating(),
+                _price(),
+              ],
+            ),
+            canOrder?Container():Padding(
+              padding: EdgeInsets.fromLTRB(8.0, 30, 8.0, 20.0),
+              child: Text(
+                '---- Not Available ----',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.75, color: Theme.of(context).primaryColorLight),
               ),
             ),
-            _paddedLabel('Description'),
-            _description(),
-            //_paddedLabel('Map'),
-            //_map(),
+            _storeOverviewTile(),
             _paddedLabel('Categories'),
             _categories(),
             _paddedLabel('Order Options'),
@@ -127,25 +119,20 @@ class _FoodItemViewState extends State<FoodItemView> {
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: _quantityAdjustor(),
             ),
-
-
-
-
-
+            canOrder?Container():Padding(
+              padding: EdgeInsets.fromLTRB(8.0, 30, 8.0, 30.0),
+              child: Text(
+                '---- Not Available ----',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.75, color: Theme.of(context).primaryColorLight),
+              ),
+            ),
             Padding(
-              padding: EdgeInsets.fromLTRB(8, 35, 8, 10),
+              padding: EdgeInsets.fromLTRB(8, 5, 8, 10),
               child: Container(
                 height: 1,
                 color: Colors.black12,
               ),
-            ),
-            _paddedLabel('Details'),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                _rating(),
-                _price(),
-              ],
             ),
             _paddedLabel('Rate/Review'),
             Padding(
@@ -157,6 +144,17 @@ class _FoodItemViewState extends State<FoodItemView> {
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: ReviewList(reviews),
             ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 40),
+              child: canOrder?Container():Padding(
+                padding: EdgeInsets.fromLTRB(8.0, 20, 8.0, 20.0),
+                child: Text(
+                  '---- Not Available ----',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.75, color: Theme.of(context).primaryColorLight),
+                ),
+              ),
+            )
           ],
         ),
       floatingActionButton: canOrder?_orderButton():Container(),
@@ -178,66 +176,11 @@ class _FoodItemViewState extends State<FoodItemView> {
     });
   }
 
+  // TODO: Implement for distance
   bool checkIfAvailable(){
     if(foodItem.isHosting)
       return true;
     return false;
-  }
-
-  void loadLocation() async{
-    var location = new Location();
-    try {
-      Map<String, double> currentLocation = await location.getLocation();
-      if(myCoords==null || (myCoords.latitude-currentLocation["latitude"]).abs()>=0.0001 || (myCoords.longitude-currentLocation["longitude"]).abs()>=0.0001)
-        setState(() {
-          myCoords = LatLng(currentLocation["latitude"], currentLocation["longitude"]);
-        });
-      updateMap();
-    } on Exception {}
-
-    DatabaseIntegrator.loc(foodItem.uid).then((val) => setState(() {
-      cookCoords = LatLng(val.latitude, val.longitude);
-      updateMap();
-    }));
-  }
-
-  void updateMap(){
-    if(mapController == null || cookCoords == null) {
-      return;
-    }
-
-    mapController.addMarker(
-      MarkerOptions(
-        position: cookCoords,
-      ),
-    );
-    if(myCoords == null) {
-      mapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(target: cookCoords, zoom: 15)
-        )
-      );
-      return;
-    }
-    mapController.animateCamera(
-      CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-          southwest: LatLng(myCoords.latitude<cookCoords.latitude?myCoords.latitude:cookCoords.latitude,
-                            myCoords.longitude<cookCoords.longitude?myCoords.longitude:cookCoords.longitude),
-          northeast: LatLng(myCoords.latitude>cookCoords.latitude?myCoords.latitude:cookCoords.latitude,
-                            myCoords.longitude>cookCoords.longitude?myCoords.longitude:cookCoords.longitude),
-        ),
-        80.0,
-      ),
-    );
-  }
-
-  void loadCookLocation(FoodItem foodItem){
-    FirebaseDatabase.instance.reference().child(foodItem.uid).child('userinfo').onValue.listen((onValue){
-      var data = onValue.snapshot.value;
-      cookCoords = LatLng(data['lat'], data['long']);
-      updateMap();
-    });
   }
 
   void loadReviews(DocumentReference ref) async {
@@ -415,8 +358,13 @@ class _FoodItemViewState extends State<FoodItemView> {
   }
 
   Widget _paddedLabel(String text){
-    return Padding(padding: EdgeInsets.fromLTRB(8.0, 20, 8.0, 8.0), child:
-    Text(text, style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5, color: Theme.of(context).primaryColorDark),),);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(8.0, 20, 8.0, 8.0),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.5, color: Theme.of(context).primaryColorDark),
+      ),
+    );
   }
 
   Widget _orderButton(){
@@ -475,7 +423,7 @@ class _FoodItemViewState extends State<FoodItemView> {
                 },
                 child: AspectRatio(
                   aspectRatio: 2,
-                  child: DatabaseIntegrator.storefrontImage(foodItem.uid),
+                  child: Services.storefrontImage(foodItem.uid),
                 ),
               ),
               AspectRatio(
@@ -488,7 +436,30 @@ class _FoodItemViewState extends State<FoodItemView> {
             padding: EdgeInsets.fromLTRB(30, 30, 30, 0),
             child: AspectRatio(
               aspectRatio: 1,
-              child: DatabaseIntegrator.foodImage(foodItem.image),
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    new BoxShadow(
+                      color: Colors.black54,
+                      blurRadius: 10.0,
+                    )
+                  ],
+                ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    Services.foodImage(foodItem.image),
+                    canOrder?Container():Padding(
+                      padding: EdgeInsets.symmetric(vertical: 30),
+                      child: Text(
+                        'Not Available',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2, fontSizeFactor: 1.75, color: Theme.of(context).primaryColorDark),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           )
         ],
@@ -497,7 +468,14 @@ class _FoodItemViewState extends State<FoodItemView> {
   }
 
   Widget _storeOverviewTile(){
-      return widget.cook != null? InkWell(
+      return widget.cook != null? Padding(
+        padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+        child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).primaryColor),
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            child: InkWell(
         onTap: (){
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -509,22 +487,10 @@ class _FoodItemViewState extends State<FoodItemView> {
         },
         child: Container(
           decoration: BoxDecoration(
-            // Box decoration takes a gradient
-//            gradient: LinearGradient(
-//              // Where the linear gradient begins and ends
-//              begin: Alignment.bottomCenter,
-//              end: Alignment.topCenter,
-//              // Add one stop for each color. Stops should increase from 0 to 1
-//              stops: [0, 0.5],
-//              colors: [
-//                // Colors are easy thanks to Flutter's Colors class.
-//                Colors.black54,
-//                Colors.black45
-//              ],
-//            ),
+            color: Theme.of(context).primaryColorLight.withAlpha(150),
           ),
           child: Padding(
-            padding: EdgeInsets.all(4),
+            padding: EdgeInsets.all(10),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -533,12 +499,12 @@ class _FoodItemViewState extends State<FoodItemView> {
                   width: 150,
                   height: 150,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).primaryColor, width: 2),
+                    border: Border.all(color: Theme.of(context).primaryColor, width: 4),
                     borderRadius: BorderRadius.circular(750),
                   ),
                   child: ClipRRect(
                     borderRadius: new BorderRadius.circular(750),
-                    child: DatabaseIntegrator.userImage('usercook'),
+                    child: Services.userImage('usercook'),
                   ),
                 ),
                 Padding(
@@ -572,7 +538,8 @@ class _FoodItemViewState extends State<FoodItemView> {
                       Text(
                         'By ${widget.cook.firstname} ${widget.cook.lastname}',
                         style: Theme.of(context).textTheme.subhead.apply(
-                          color: Theme.of(context).primaryColorDark
+                          color: Theme.of(context).primaryColor.withAlpha(200),
+                          fontSizeFactor: 0.9,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -583,7 +550,7 @@ class _FoodItemViewState extends State<FoodItemView> {
             ),
           ),
         ),
-      ):Container();
+      ),),):Container();
   }
 
   Widget _description() {
@@ -595,8 +562,10 @@ class _FoodItemViewState extends State<FoodItemView> {
             child: Center(
               child: Text(
                 '${foodItem.description}',
-                style: Theme.of(context).textTheme.subhead,
+                style: Theme.of(context).textTheme.headline,
                 textAlign: TextAlign.center,
+                maxLines: 10,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           )
@@ -612,12 +581,13 @@ class _FoodItemViewState extends State<FoodItemView> {
     }
     return Center(
       child: reviews.length>0?Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text('Rating: ${(rating/reviews.length.toDouble()).toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,),
+          Text('Rating: ${(rating/reviews.length.toDouble()).toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2),),
           Padding(padding: EdgeInsets.all(2.0),),
-          Icon(Icons.star_border,size: 15.0,),
+          Icon(Icons.star,size: 20.0,),
           Padding(padding: EdgeInsets.all(2.0),),
-          Text('(${reviews.length} rating${reviews.length==1?'':'s'})', style: Theme.of(context).textTheme.subhead,),
+          Text('(${reviews.length} rating${reviews.length==1?'':'s'})', style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 2),),
         ],
       ):Text('No Ratings Available', style: Theme.of(context).textTheme.subhead,),
     );
@@ -625,43 +595,25 @@ class _FoodItemViewState extends State<FoodItemView> {
 
   Widget _price(){
     return Center(
-      child: Text('Base Price: \$${foodItem.price.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,),
-    );
-  }
-
-  Widget _map(){
-    return Container(
-      height: 400.0,
-      child: GoogleMap(
-        onMapCreated: (GoogleMapController controller) {
-          mapController = controller;
-        },
-        // TODO: Change these map options
-        options: GoogleMapOptions(
-          mapType: MapType.normal,
-          myLocationEnabled: true,
-          rotateGesturesEnabled: false,
-          scrollGesturesEnabled: false,
-          tiltGesturesEnabled: false,
-        ),
-      ),
+      child: Text('Starting at \$${foodItem.price.toStringAsFixed(2)}', style: Theme.of(context).textTheme.subhead,),
     );
   }
 
   Widget _categories(){
     return Container(
-      height: 50,
+      height: 70,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        children: foodItem.categories.map((cat) => Padding(padding: EdgeInsets.symmetric(horizontal: 4.0),child: Container(width: 150, child: CategoryTile(cat, (){
-
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return Search(isSearching: true, searchFieldText: cat,);
-              },
-            ),
-          );
+        children: foodItem.categories.map((cat) => Padding(padding: EdgeInsets.symmetric(horizontal: 4.0),child: Container(
+            width: 120,
+            child: CategoryTile(cat, (){
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return Search(isSearching: true, searchFieldText: cat,);
+                  },
+                ),
+              );
         })))).toList()
       ),
     );
@@ -750,7 +702,7 @@ class _FoodItemViewState extends State<FoodItemView> {
                         }else{
                           setState(() {
                             selection.selections.removeLast();
-                            selection.prices.removeLast();
+                            price -= selection.prices.removeLast();
                             selection.selections.insert(0, optionName);
                             selection.prices.insert(0,
                                 option.price[option.options.indexOf(
@@ -818,7 +770,8 @@ class _FoodItemViewState extends State<FoodItemView> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         FlatButton(
-          child: Icon(Icons.remove),
+          color: Theme.of(context).primaryColorLight,
+          child: Icon(Icons.remove, color: Theme.of(context).primaryColorDark,),
           onPressed: (){
             if(quantity > 1)
               setState(() {
@@ -831,7 +784,8 @@ class _FoodItemViewState extends State<FoodItemView> {
           style: Theme.of(context).textTheme.subtitle.apply(fontWeightDelta: 1, fontSizeFactor: 1.2),
         ),
         FlatButton(
-          child: Icon(Icons.add),
+          child: Icon(Icons.add, color: Theme.of(context).primaryColorDark,),
+          color: Theme.of(context).primaryColorLight,
           onPressed: (){
             setState(() {
               quantity++;
@@ -934,7 +888,7 @@ class _FoodItemViewState extends State<FoodItemView> {
           },
           child: Text(
             '${myRating<=0?'Tap Stars to Rate':'${reviewController.text==''?'Rate':'Rate and Review'}'}',
-            style: Theme.of(context).textTheme.button.apply(color: Theme.of(context).primaryColor),
+            style: Theme.of(context).textTheme.button.apply(color: myRating<=0?Colors.black:Theme.of(context).primaryColor),
           ),
         ),
       ],

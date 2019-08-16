@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cookt/models/orders/Order.dart';
 import 'package:cookt/models/orders/Item.dart';
-import 'package:cookt/models/DatabaseIntegrator.dart';
+import 'package:cookt/services/Services.dart';
 
 import 'IncomingItemTile.dart';
 
@@ -77,7 +77,7 @@ class _IncomingOrderTileState extends State<IncomingOrderTile> {
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
-                  '${order.active? 'Ready by':order.status == Status.finished?'Completed at':'Cancelled by ${order.lastTouchedID == 'usercook'? 'you at': 'customer at'}'} ${order.active?DatabaseIntegrator.onlyTime(order.active?order.pickupTime:order.lastTouchedTime):DatabaseIntegrator.simplifiedDate(order.active?order.pickupTime:order.lastTouchedTime)}',
+                  '${order.active? 'Ready by':order.status == Status.finished?'Completed at':'Cancelled by ${order.lastTouchedID == 'usercook'? 'you at': 'customer at'}'} ${order.active?Services.onlyTime(order.active?order.pickupTime:order.lastTouchedTime):Services.simplifiedDate(order.active?order.pickupTime:order.lastTouchedTime)}',
                   style: order.active?Theme.of(context).textTheme.subtitle.apply(fontSizeFactor: 1.2):Theme.of(context).textTheme.subhead.apply(fontSizeFactor: 0.75),
                 ),
               ),

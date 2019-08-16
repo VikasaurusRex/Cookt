@@ -10,7 +10,7 @@ class Search extends StatefulWidget {
   bool isSearching;
   String searchFieldText;
 
-  Search({this.isSearching = false, this.searchFieldText = ''});
+  Search({this.isSearching = false, this.searchFieldText});
 
   @override
   State<StatefulWidget> createState() =>_SearchState(isSearching: this.isSearching, searchFieldText: this.searchFieldText);
@@ -33,7 +33,7 @@ class _SearchState extends State<Search> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: _searchBar(),
+        title: widget.searchFieldText!=null?Text('${widget.searchFieldText}'):_searchBar(),
       ),
       body: isSearching? _currentSearch()
           :

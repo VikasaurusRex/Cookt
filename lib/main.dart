@@ -9,9 +9,7 @@ import 'package:cookt/widgets/search/Search.dart';
 import 'package:cookt/widgets/orders/Orders.dart';
 import 'package:cookt/widgets/profile/Profile.dart';
 
-import 'widgets/personal/StoreOverview.dart';
-
-import 'package:cookt/models/DatabaseIntegrator.dart';
+import 'package:cookt/models/Services.dart';
 
 void main() => runApp(MyApp());
 
@@ -47,6 +45,7 @@ class MyApp extends StatelessWidget {
           padding: EdgeInsets.all(0),
           layoutBehavior: ButtonBarLayoutBehavior.constrained,
         ),
+        hintColor: Theme.of(context).primaryColorDark,
       ),
     );
   }
@@ -167,6 +166,7 @@ class _HomeState extends State<Home> {
 
 
 // MARK: Placeholders for Development of Specialized Widgets
+// TODO: Delete the class
 
 class PlaceholderWidget extends StatefulWidget {
   final Color color;
@@ -181,7 +181,7 @@ class _PlaceholderWidgetState extends State<PlaceholderWidget> {
   String _name = "";
 
   void loadData() {
-    DatabaseIntegrator.foodName("1yzdDBacqdeRxewvuczy").then((val) => setState(() {
+    Services.foodName("1yzdDBacqdeRxewvuczy").then((val) => setState(() {
       _name = val;
     }));
   }

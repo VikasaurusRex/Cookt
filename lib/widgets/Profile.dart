@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cookt/models/DatabaseIntegrator.dart';
+import 'package:cookt/services/Services.dart';
 import 'package:cookt/services/PaymentService.dart';
 
 import 'package:stripe_payment/stripe_payment.dart';
@@ -25,7 +25,7 @@ class _ProfileState extends State<Profile> {
   String userid;
 
   void loadData() {
-    DatabaseIntegrator.nameFull('usercook').then((val) => setState(() {
+    Services.nameFull('usercook').then((val) => setState(() {
       _name = val;
     }));
   }
@@ -53,7 +53,7 @@ class _ProfileState extends State<Profile> {
                   height: 100,
                   //child: ClipRRect(
                     //borderRadius: new BorderRadius.circular(10),
-                    child: DatabaseIntegrator.userImage('usercook'),
+                    child: Services.userImage('usercook'),
                   //),
                 ),
                 Expanded(

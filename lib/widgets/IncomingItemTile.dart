@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:cookt/models/orders/Item.dart';
-import 'package:cookt/models/DatabaseIntegrator.dart';
+import 'package:cookt/services/Services.dart';
 import 'package:cookt/models/orders/Selection.dart';
 
 import 'package:cookt/widgets/orders/ItemTile.dart';
@@ -24,7 +24,7 @@ class _IncomingItemTileState extends State<IncomingItemTile> {
   List<Selection> selections = List();
 
   void loadData(){
-    DatabaseIntegrator.foodName(item.foodID).then((val){
+    Services.foodName(item.foodID).then((val){
       setState(() {
         _itemName = val;
       });
