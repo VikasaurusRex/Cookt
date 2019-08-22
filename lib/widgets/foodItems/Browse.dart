@@ -4,8 +4,8 @@ import 'dart:core';
 
 import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'package:cookt/models/foodItems/FoodItemList.dart';
-import 'Shelf.dart';
-import 'package:cookt/widgets/search/FoodItemListView.dart';
+import 'package:cookt/widgets/foodItems/Shelf.dart';
+import 'package:cookt/widgets/foodItems/FoodItemListView.dart';
 
 
 class Browse extends StatefulWidget {

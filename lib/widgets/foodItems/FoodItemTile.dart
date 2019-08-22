@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cookt/models/foodItems/FoodItem.dart';
-import 'package:cookt/models/user/User.dart';
-import 'package:cookt/widgets/browse/FoodItemView.dart';
-import 'package:cookt/widgets/personal/StoreOverview.dart';
+import 'package:cookt/models/users/User.dart';
+import 'package:cookt/widgets/foodItems/FoodItemView.dart';
+import 'package:cookt/widgets/sell/StoreOverview.dart';
 
 import 'package:cookt/services/Services.dart';
-import 'InfoTiles.dart';
+import 'package:cookt/widgets/foodItems/InfoTiles.dart';
 
 class FoodItemTile extends StatefulWidget {
 
@@ -68,7 +68,7 @@ class _FoodItemTileState extends State<FoodItemTile>{
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return FoodItemView(reference: item.reference, cook: user);
+                  return FoodItemView(foodItem: item, cook: user);
                 },
               ),
             );
@@ -85,7 +85,7 @@ class _FoodItemTileState extends State<FoodItemTile>{
                         aspectRatio: 1,
                         child: Services.foodImage(item.image),
                       ),
-                      widget.showUser?_userTile():Container(),
+                      //widget.showUser?_userTile():Container(),
                     ],
                   ),
                   Padding(

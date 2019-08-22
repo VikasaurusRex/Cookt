@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'SaleConsole.dart';
-import 'MyFoodItems.dart';
+import 'package:cookt/widgets/sell/SaleConsole.dart';
+import 'package:cookt/widgets/sell/MyFoodItems.dart';
 
 class SaleHome extends StatefulWidget {
   @override

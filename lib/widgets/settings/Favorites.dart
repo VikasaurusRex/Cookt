@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:cookt/models/foodItems/FoodItemList.dart';
-import 'package:cookt/widgets/search/FoodItemListView.dart';
+import 'package:cookt/widgets/foodItems/FoodItemListView.dart';
 
 class Favorites extends StatefulWidget {
   @override

@@ -5,8 +5,8 @@ import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'package:cookt/services/Services.dart';
 import 'package:cookt/models/help/Conversation.dart';
 
-import 'HelpNewIssue.dart';
-import 'HelpChat.dart';
+import 'package:cookt/widgets/settings/HelpNewIssue.dart';
+import 'package:cookt/widgets/settings/HelpChat.dart';
 
 class Help extends StatefulWidget {
 

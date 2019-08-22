@@ -4,7 +4,7 @@ import 'package:geocoder/geocoder.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'package:cookt/models/user/User.dart';
+import 'package:cookt/models/users/User.dart';
 import 'package:cookt/services/Services.dart';
 
 class Address extends StatefulWidget {

@@ -6,11 +6,11 @@ import 'package:stripe_payment/stripe_payment.dart';
 
 import 'package:cookt/widgets/sell/SaleHome.dart';
 
-import 'package:cookt/widgets/profile/Favorites.dart';
-import 'package:cookt/widgets/profile/Payment.dart';
-import 'package:cookt/widgets/profile/Help.dart';
-import 'package:cookt/widgets/profile/Settings.dart';
-import 'package:cookt/widgets/profile/Address.dart';
+import 'package:cookt/widgets/settings/Favorites.dart';
+import 'package:cookt/widgets/settings/Payment.dart';
+import 'package:cookt/widgets/settings/Help.dart';
+import 'package:cookt/widgets/settings/Settings.dart';
+import 'package:cookt/widgets/settings/Address.dart';
 
 class Profile extends StatefulWidget {
 

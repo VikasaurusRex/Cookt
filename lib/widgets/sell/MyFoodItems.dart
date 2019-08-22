@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'package:cookt/services/Services.dart';
-import 'EditFoodItem.dart';
+import 'package:cookt/widgets/foodItems/EditFoodItem.dart';
 
 class MyFoodItems extends StatefulWidget {
 

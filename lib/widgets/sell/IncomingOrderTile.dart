@@ -4,7 +4,7 @@ import 'package:cookt/models/orders/Order.dart';
 import 'package:cookt/models/orders/Item.dart';
 import 'package:cookt/services/Services.dart';
 
-import 'IncomingItemTile.dart';
+import 'package:cookt/widgets/sell/IncomingItemTile.dart';
 
 class IncomingOrderTile extends StatefulWidget {
   final Order order;
@@ -26,6 +26,7 @@ class IncomingOrderTile extends StatefulWidget {
 class _IncomingOrderTileState extends State<IncomingOrderTile> {
   final Order order;
   List<Item> items = List();
+  bool handedOff = false;
 
   String _totalPrice = "";
 
@@ -91,6 +92,7 @@ class _IncomingOrderTileState extends State<IncomingOrderTile> {
                   children: items.map((item) => IncomingItemTile(item, accepted: order.status == Status.accepted, key: Key(item.toString()),)).toList(),
                 ),
               ),
+
               Container(
                 color: Colors.black12,
                 height: 1.0,
@@ -125,7 +127,7 @@ class _IncomingOrderTileState extends State<IncomingOrderTile> {
                 if(!item.prepared)
                   allCompleted = false;
               });
-              if(allCompleted)
+              if(allCompleted && handedOff)
                 widget.acceptFinishOrder(order);
               else
                 _notPreparedError();

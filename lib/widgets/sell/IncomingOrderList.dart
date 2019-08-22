@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:cookt/models/orders/Order.dart';
 import 'package:cookt/services/PaymentService.dart';
-import 'IncomingOrderTile.dart';
+import 'package:cookt/widgets/sell/IncomingOrderTile.dart';
 
 class IncomingOrderList extends StatefulWidget {
   final List<Query> queries;

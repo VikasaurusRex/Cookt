@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'IncomingOrderList.dart';
+import 'package:cookt/widgets/sell/IncomingOrderList.dart';
 
 class SaleConsole extends StatelessWidget {
 

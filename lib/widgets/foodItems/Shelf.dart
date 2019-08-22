@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:cookt/models/user/User.dart';
+import 'package:cookt/models/users/User.dart';
 import 'package:cookt/models/foodItems/FoodItem.dart';
-import 'package:cookt/widgets/search/FoodItemTile.dart';
+import 'package:cookt/widgets/foodItems/FoodItemTile.dart';
 
 class Shelf extends StatelessWidget {
   final String title;

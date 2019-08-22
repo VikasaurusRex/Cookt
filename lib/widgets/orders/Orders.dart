@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'OrderList.dart';
+import 'package:cookt/widgets/orders/OrderList.dart';
 
 class Orders extends StatelessWidget {
 

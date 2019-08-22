@@ -6,11 +6,11 @@ import 'dart:io';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:cookt/models/user/User.dart';
+import 'package:cookt/models/users/User.dart';
 import 'package:cookt/services/Services.dart';
 
 import 'package:cookt/models/foodItems/FoodItem.dart';
-import 'package:cookt/widgets/search/FoodItemTile.dart';
+import 'package:cookt/widgets/foodItems/FoodItemTile.dart';
 
 class StoreOverview extends StatefulWidget {
 

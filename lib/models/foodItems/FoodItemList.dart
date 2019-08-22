@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cookt/models/User.dart';
+import 'package:cookt/models/users/User.dart';
 import 'FoodItem.dart';
 
 class FoodItemList {

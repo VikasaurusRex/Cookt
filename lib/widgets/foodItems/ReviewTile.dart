@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:cookt/models/foodItems/Review.dart';
 import 'package:cookt/services/Services.dart';
-import 'package:cookt/models/user/User.dart';
+import 'package:cookt/models/users/User.dart';
 
 class ReviewTile extends StatefulWidget {
   final Review review;

@@ -12,10 +12,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cookt/models/orders/Order.dart';
 import 'package:cookt/models/orders/Item.dart';
 import 'package:cookt/services/Services.dart';
-import 'package:cookt/models/user/User.dart';
-import 'ItemTile.dart';
+import 'package:cookt/models/users/User.dart';
+import 'package:cookt/widgets/orders/ItemTile.dart';
 
-import 'package:cookt/widgets/personal/StoreOverview.dart';
+import 'package:cookt/widgets/sell/StoreOverview.dart';
 
 class OrderTile extends StatefulWidget {
   final Order order;
@@ -93,6 +93,8 @@ class _OrderTileState extends State<OrderTile> {
     }else{
       order.deliveryPrice = 0;
     }
+
+    order.stripePrice = (price*_stripeRate) + _stripeConstant;
 
     price += (price*_stripeRate) + _stripeConstant;
 

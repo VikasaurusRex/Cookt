@@ -5,7 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 import 'package:cookt/models/foodItems/Review.dart';
-import 'package:cookt/models/User.dart';
+import 'package:cookt/models/users/User.dart';
 
 class Services{
 

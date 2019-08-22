@@ -5,7 +5,7 @@ import 'package:cookt/services/Services.dart';
 import 'package:cookt/models/help/Conversation.dart';
 import 'package:cookt/models/help/Message.dart';
 
-import 'HelpNewIssue.dart';
+import 'package:cookt/widgets/settings/HelpNewIssue.dart';
 
 class HelpChat extends StatefulWidget {
 

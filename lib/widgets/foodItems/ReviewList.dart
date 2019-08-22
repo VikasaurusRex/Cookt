@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:cookt/models/foodItems/Review.dart';
-import 'ReviewTile.dart';
+import 'package:cookt/widgets/foodItems/ReviewTile.dart';
 
 class ReviewList extends StatefulWidget {
   List<Review> reviews;

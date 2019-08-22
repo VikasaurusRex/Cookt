@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'package:cookt/models/foodItems/FoodItemList.dart';
-import 'CategoryTile.dart';
-import 'FoodItemListView.dart';
+import 'package:cookt/widgets/foodItems/CategoryTile.dart';
+import 'package:cookt/widgets/foodItems/FoodItemListView.dart';
 
 
 class Search extends StatefulWidget {

@@ -1,31 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:location/location.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'package:cookt/models/foodItems/Review.dart';
 import 'package:cookt/models/foodItems/FoodItem.dart';
 import 'package:cookt/models/foodItems/Option.dart';
-import 'package:cookt/models/foodItems/Review.dart';
 import 'package:cookt/models/orders/Selection.dart';
 import 'package:cookt/models/orders/Order.dart';
 import 'package:cookt/models/orders/Item.dart';
+import 'package:cookt/models/users/User.dart';
 import 'package:cookt/services/Services.dart';
-import 'package:cookt/models/user/User.dart';
 
-import 'package:cookt/widgets/search/CategoryTile.dart';
-import 'package:cookt/widgets/search/Search.dart';
-import 'package:cookt/widgets/personal/StoreOverview.dart';
-import 'ReviewList.dart';
+import 'package:cookt/widgets/foodItems/CategoryTile.dart';
+import 'package:cookt/widgets/foodItems/Search.dart';
+import 'package:cookt/widgets/foodItems/ReviewList.dart';
+import 'package:cookt/widgets/sell/StoreOverview.dart';
 
 class FoodItemView extends StatefulWidget {
-  final DocumentReference reference;
+  final FoodItem foodItem;
   final User cook;
 
-  FoodItemView({@required this.reference, this.cook});
+  FoodItemView({@required this.foodItem, @required this.cook});
 
   @override
-  _FoodItemViewState createState() => _FoodItemViewState(reference);
+  _FoodItemViewState createState() => _FoodItemViewState(foodItem, cook);
 }
 
 class _FoodItemViewState extends State<FoodItemView> {
@@ -38,46 +36,74 @@ class _FoodItemViewState extends State<FoodItemView> {
 
   // TODO: Remove buy button when far away
 
+  FoodItem foodItem;
+  User cook;
+  List<Review> reviews = [];
+  List<Option> options = [];
+
+  double rating;
+
   bool hasOrdered = false;
   bool canOrder = false;
 
   ScrollController scroller = ScrollController();
 
   // One TextEditingController for each form input:
-  FoodItem foodItem = FoodItem.newItem();
   Map<String, Widget> loadedImages = Map();
-  List<Review> reviews = [];
-  List<Option> orderOptions = [];
   List<Selection> itemSelections = [];
 
-  double price = 0.0;
-  int quantity = 1;
+  Item item;
 
   TextEditingController reviewController = TextEditingController();
   int myRating = 0;
 
-  _FoodItemViewState(DocumentReference reference){
+  _FoodItemViewState(this.foodItem, this.cook){
 
-
+    DocumentReference reference = foodItem.reference;
     if(reference!=null){
+
+      item = Item.from(foodItem.uid, foodItem.price, 1);
+
       reference.get().then((onValue){
-          FoodItem foodItemLoaded = FoodItem.fromSnapshot(onValue);
-          setState(() {
-            foodItem = foodItemLoaded;
+        this.foodItem = FoodItem.fromSnapshot(onValue);
+
+        double sumRatings = 0;
+        reference.collection("reviews").getDocuments().then((snapshots){
+          for (int i = 0; i < snapshots.documentChanges.length; i++) {
+            Review review = Review.fromSnapshot(snapshots.documents.elementAt(i));
+            if (!reviews.contains(review)){
+              setState(() {
+                reviews.add(review);
+                if(review.userid=='usercustomer'){
+                  reviewController.text = review.review;
+                  myRating = review.rating;
+                }
+              });
+            }else{
+              setState(() {
+                reviews.remove(review);
+                reviews.add(review);
+              });
+            }
+          }
+          this.rating = sumRatings/reviews.length.toDouble();
+          print('Rating: ${this.rating}'); // -------------------------------------------------------------------------
+        });
+
+        reference.collection('options').getDocuments().then((optionsSnapshots){
+          optionsSnapshots.documents.forEach((snapshot){
+            options.add(Option.fromSnapshot(snapshot));
           });
+          itemSelections = options.map((option) => Selection.from(option.title)).toList();
+          print('Options: ${options}'); // -------------------------------------------------------------------------
+        });
 
-          loadReviews(reference);
-          checkIfOrdered();
-          canOrder = checkIfAvailable();
+        Firestore.instance.collection('users').document(foodItem.uid).get().then((snapshot){
+          this.cook = User.fromSnapshot(snapshot);
+        });
 
-          price = foodItem.price;
-
-          reference.collection('options').getDocuments().then((optionsSnapshots){
-            optionsSnapshots.documents.forEach((snapshot){
-              orderOptions.add(Option.fromSnapshot(snapshot));
-            });
-            itemSelections = orderOptions.map((option) => Selection.from(option.title)).toList();
-          });
+        checkIfOrdered();
+        canOrder = checkIfAvailable();
       });
     }
   }
@@ -85,7 +111,7 @@ class _FoodItemViewState extends State<FoodItemView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(foodItem.name),),
+      appBar: AppBar(title: Text(widget.foodItem.name),),
       body: ListView(
           shrinkWrap: true,
           children: [
@@ -135,10 +161,10 @@ class _FoodItemViewState extends State<FoodItemView> {
               ),
             ),
             _paddedLabel('Rate/Review'),
-            Padding(
+            hasOrdered?Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: _rateAndReview(),
-            ),
+            ):Container(),
             _paddedLabel('Other Reviews'),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
@@ -163,9 +189,9 @@ class _FoodItemViewState extends State<FoodItemView> {
   }
 
   void checkIfOrdered() async {
-    Firestore.instance.collection("orders").where('customerID', isEqualTo: 'usercustomer').where('cookID', isEqualTo: '${foodItem.uid}').where('active', isEqualTo: false).getDocuments().then((snapshots) {
+    Firestore.instance.collection("orders").where('customerID', isEqualTo: 'usercustomer').where('cookID', isEqualTo: '${widget.foodItem.uid}').where('active', isEqualTo: false).getDocuments().then((snapshots) {
       snapshots.documents.forEach((snapshot) {
-        snapshot.reference.collection('items').where('foodID', isEqualTo: foodItem.reference.documentID).getDocuments().then((itemSnaps){
+        snapshot.reference.collection('items').where('foodID', isEqualTo: widget.foodItem.reference.documentID).getDocuments().then((itemSnaps){
           itemSnaps.documents.forEach((snap) {
             setState(() {
               hasOrdered = true;
@@ -178,33 +204,9 @@ class _FoodItemViewState extends State<FoodItemView> {
 
   // TODO: Implement for distance
   bool checkIfAvailable(){
-    if(foodItem.isHosting)
+    if(widget.foodItem.isHosting)
       return true;
     return false;
-  }
-
-  void loadReviews(DocumentReference ref) async {
-    await for (QuerySnapshot snapshots in ref
-        .collection("reviews")
-        .snapshots().asBroadcastStream()) {
-      for (int i = 0; i < snapshots.documentChanges.length; i++) {
-        Review review = Review.fromSnapshot(snapshots.documents.elementAt(i));
-        if (!reviews.contains(review)){
-          setState(() {
-            reviews.add(review);
-            if(review.userid=='usercustomer'){
-              reviewController.text = review.review;
-              myRating = review.rating;
-            }
-          });
-        }else{
-          setState(() {
-            reviews.remove(review);
-            reviews.add(review);
-          });
-        }
-      }
-    }
   }
 
   void rateAndReview(){
@@ -300,7 +302,6 @@ class _FoodItemViewState extends State<FoodItemView> {
     // Add all Selections to the Item. If the selections is [], add 'NONE'
     // Add the Price of additions to the ItemPrice
 
-    // Check if online (May fail if google.com is down)
     foodItem.reference.get().then((snap){
       FoodItem tempItem = FoodItem.fromSnapshot(snap);
       if(tempItem.isHosting) {
@@ -312,17 +313,13 @@ class _FoodItemViewState extends State<FoodItemView> {
           if(querySnapshot != null && querySnapshot.documents != null && querySnapshot.documents.length > 0) {
             // Found Order
             Order order = Order.fromSnapshot(querySnapshot.documents.first);
-            Item item = Item.from(foodItem.reference.documentID, price, quantity);
             order.addItem(item, itemSelections);
-            Navigator.of(context).pop();
           }else{
             //Create Order
             Order order = Order.newOrder(foodItem.uid);
-            Item item = Item.from(foodItem.reference.documentID, price, quantity);
             order.create(item: item, selections: itemSelections);
-            Navigator.of(context).pop();
           }
-
+          Navigator.of(context).pushReplacementNamed("/main/orders");
         });
       }else{
         _notAvailable();
@@ -384,7 +381,7 @@ class _FoodItemViewState extends State<FoodItemView> {
             onTap: orderItem,
             child: Padding(
               padding: EdgeInsets.all(8.0),
-              child: Text('\$${price<=0? '\$\$.\$\$': (price*quantity).toStringAsFixed(2)}', style: Theme.of(context).textTheme.subtitle.apply(fontSizeFactor: 2),),
+              child: Text('\$${item.price<=0? '\$\$.\$\$': (item.price*item.quantity).toStringAsFixed(2)}', style: Theme.of(context).textTheme.subtitle.apply(fontSizeFactor: 2),),
             ),
           ),
         ),
@@ -412,18 +409,18 @@ class _FoodItemViewState extends State<FoodItemView> {
           Column(
             children: <Widget>[
               InkWell(
-                onTap:  widget.cook == null? null:(){
+                onTap:  cook == null? null:(){
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (BuildContext context) {
-                        return StoreOverview(widget.cook);
+                        return StoreOverview(cook);
                       },
                     ),
                   );
                 },
                 child: AspectRatio(
-                  aspectRatio: 2,
-                  child: Services.storefrontImage(foodItem.uid),
+                  aspectRatio: 2.3,
+                  child: Container(color: Theme.of(context).primaryColorLight,),//Services.storefrontImage(foodItem.uid),
                 ),
               ),
               AspectRatio(
@@ -468,7 +465,7 @@ class _FoodItemViewState extends State<FoodItemView> {
   }
 
   Widget _storeOverviewTile(){
-      return widget.cook != null? Padding(
+      return cook != null? Padding(
         padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
         child: Container(
             decoration: BoxDecoration(
@@ -480,7 +477,7 @@ class _FoodItemViewState extends State<FoodItemView> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (BuildContext context) {
-                return StoreOverview(widget.cook);
+                return StoreOverview(cook);
               },
             ),
           );
@@ -513,20 +510,20 @@ class _FoodItemViewState extends State<FoodItemView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      widget.cook.kitchenname == null?Container():
+                      cook.kitchenname == null?Container():
                         Text(
-                          widget.cook.kitchenname,
+                          cook.kitchenname,
                           style: Theme.of(context).textTheme.headline.apply(
                             fontWeightDelta: 2,
                             color: Theme.of(context).primaryColorDark,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                      widget.cook.about == null?Container():
+                      cook.about == null?Container():
                         Container(
                           width: 250,
                           child: Text(
-                            widget.cook.about,
+                            cook.about,
                             maxLines: 4,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.subhead.apply(
@@ -536,7 +533,7 @@ class _FoodItemViewState extends State<FoodItemView> {
                           ),
                         ),
                       Text(
-                        'By ${widget.cook.firstname} ${widget.cook.lastname}',
+                        'By ${cook.firstname} ${cook.lastname}',
                         style: Theme.of(context).textTheme.subhead.apply(
                           color: Theme.of(context).primaryColor.withAlpha(200),
                           fontSizeFactor: 0.9,
@@ -626,7 +623,7 @@ class _FoodItemViewState extends State<FoodItemView> {
 
     return Container(
       child: Column(
-        children: orderOptions.map((option) => Padding(
+        children: options.map((option) => Padding(
           padding: EdgeInsets.symmetric(vertical: 2.0),
           child: _singleOptionSelector(option),
         )).toList(),
@@ -679,7 +676,7 @@ class _FoodItemViewState extends State<FoodItemView> {
               child:Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: option.options.map((optionName){
-                  Selection selection = itemSelections[orderOptions.indexOf(option)];
+                  Selection selection = itemSelections[options.indexOf(option)];
                   return FlatButton(
                     color: selection.selections.contains(optionName)? Theme.of(context).primaryColorLight: Colors.transparent,
                     onPressed: (){
@@ -687,28 +684,22 @@ class _FoodItemViewState extends State<FoodItemView> {
                       if(index >= 0) { // contained
                         setState(() {
                           selection.selections.removeAt(index);
-                          price -= selection.prices.removeAt(index);
+                          item.price -= selection.prices.removeAt(index);
                         });
                       }else{
                         if (selection.selections.length < option.maxSelection) {
                           setState(() {
                             selection.selections.add(optionName);
-                            selection.prices.add(
-                                option.price[option.options.indexOf(
-                                    optionName)]);
-                            price +=
-                            option.price[option.options.indexOf(optionName)];
+                            selection.prices.add(option.price[option.options.indexOf(optionName)]);
+                            item.price += option.price[option.options.indexOf(optionName)];
                           });
                         }else{
                           setState(() {
                             selection.selections.removeLast();
-                            price -= selection.prices.removeLast();
+                            item.price -= selection.prices.removeLast();
                             selection.selections.insert(0, optionName);
-                            selection.prices.insert(0,
-                                option.price[option.options.indexOf(
-                                    optionName)]);
-                            price +=
-                            option.price[option.options.indexOf(optionName)];
+                            selection.prices.insert(0, option.price[option.options.indexOf(optionName)]);
+                            item.price += option.price[option.options.indexOf(optionName)];
                           });
                         }
                       }
@@ -773,14 +764,14 @@ class _FoodItemViewState extends State<FoodItemView> {
           color: Theme.of(context).primaryColorLight,
           child: Icon(Icons.remove, color: Theme.of(context).primaryColorDark,),
           onPressed: (){
-            if(quantity > 1)
+            if(item.quantity > 1)
               setState(() {
-                quantity--;
+                item.quantity--;
               });
           },
         ),
         Text(
-          '$quantity ${foodItem.name}${quantity>1? 's':''}',
+          '${item.quantity} ${foodItem.name}${item.quantity>1? 's':''}',
           style: Theme.of(context).textTheme.subtitle.apply(fontWeightDelta: 1, fontSizeFactor: 1.2),
         ),
         FlatButton(
@@ -788,7 +779,7 @@ class _FoodItemViewState extends State<FoodItemView> {
           color: Theme.of(context).primaryColorLight,
           onPressed: (){
             setState(() {
-              quantity++;
+              item.quantity++;
             });
           },
         ),

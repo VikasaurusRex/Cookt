@@ -4,42 +4,37 @@ import 'package:flutter/painting.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stripe_payment/stripe_payment.dart';
 
-import 'package:cookt/widgets/browse/Browse.dart';
-import 'package:cookt/widgets/search/Search.dart';
+import 'package:cookt/widgets/foodItems/Browse.dart';
+import 'package:cookt/widgets/foodItems/Search.dart';
 import 'package:cookt/widgets/orders/Orders.dart';
-import 'package:cookt/widgets/profile/Profile.dart';
+import 'package:cookt/widgets/settings/Profile.dart';
 
-import 'package:cookt/models/Services.dart';
+import 'package:cookt/services/Services.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       title: "Cookt",
       home: Home(),
       theme: ThemeData(
-//        primarySwatch:
-//        MaterialColor(
-//            0xff00ff00,
-//          {
-//            50: Color(0xffff0000),
-//            100: Color(0xffff0000), // <-----
-//            200: Color(0xff00ff00),
-//            300: Color(0xff00ff00),
-//            400: Color(0xff00ff00),
-//            500: Color(0xff00ff00),
-//            600: Color(0xff00ff00),
-//            700: Color(0xff0000ff), // <-----
-//            800: Color(0xff0000ff),
-//            900: Color(0xff0000ff),
-//          }
-//        ),
-        //accentColor: ,
-        //cardColor: Colors.greenAccent,
-        //disabledColor: ,
+//      primarySwatch: MaterialColor( 0xff00ff00,
+//        {
+//          50: Color(0xffff0000),
+//          100: Color(0xffff0000), // <-----
+//          200: Color(0xff00ff00),
+//          300: Color(0xff00ff00),
+//          400: Color(0xff00ff00),
+//          500: Color(0xff00ff00),
+//          600: Color(0xff00ff00),
+//          700: Color(0xff0000ff), // <-----
+//          800: Color(0xff0000ff),
+//          900: Color(0xff0000ff),
+//        }
+//      ),
         fontFamily: 'OpenSans',
         buttonTheme: ButtonThemeData(
           padding: EdgeInsets.all(0),
@@ -47,14 +42,21 @@ class MyApp extends StatelessWidget {
         ),
         hintColor: Theme.of(context).primaryColorDark,
       ),
+      routes: {
+        "/main/orders": (_) => new Home(pageInd: 2,),
+      },
     );
   }
 }
 
 class Home extends StatefulWidget {
+  int pageInd;
+
+  Home({this.pageInd = 0});
+
   @override
   State<StatefulWidget> createState() {
-    return _HomeState();
+    return _HomeState(pageInd: pageInd);
   }
 }
 
@@ -68,6 +70,10 @@ class _HomeState extends State<Home> {
   List<Widget> _appBars;
 
   Map<String, int> _specializedIndices = Map();
+
+  _HomeState({int pageInd = 0}){
+    _currentIndex = pageInd;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +96,7 @@ class _HomeState extends State<Home> {
     ];
 
     return Scaffold(
-      appBar: _appBars[_currentIndex]==null?null:AppBar(title: _appBars[_currentIndex]),//_appBars[_currentIndex],
+      appBar: _appBars[_currentIndex]==null?null:AppBar(title: _appBars[_currentIndex], automaticallyImplyLeading: false),//_appBars[_currentIndex],
       body: _children[_currentIndex], // new
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
