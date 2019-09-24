@@ -1,6 +1,6 @@
 # cookt
 
-Cookt, making homecooked meals affordable and accessable
+Cookt, making homecooked meals affordable and accessible
 
 ## Getting Started
 
